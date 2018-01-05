@@ -116,7 +116,7 @@ public class EfergyEngageHandler extends BaseThingHandler {
             String line = readResponse(connection);
 
             EfergyEngageGetTokenResponse response = gson.fromJson(line, EfergyEngageGetTokenResponse.class);
-            logger.debug("Efergy login response: {}", line);
+            logger.info("Efergy login response: {}", line);
 
             if (response.getStatus().equals("ok")) {
                 token = response.getToken();
