@@ -9,6 +9,9 @@
 package org.openhab.binding.efergyengage.handler;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.eclipse.smarthome.core.cache.ExpiringCacheMap;
 import org.eclipse.smarthome.core.library.types.DateTimeType;
 import org.eclipse.smarthome.core.library.types.DecimalType;
@@ -32,6 +35,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Calendar;
+import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -116,7 +120,7 @@ public class EfergyEngageHandler extends BaseThingHandler {
             String line = readResponse(connection);
 
             EfergyEngageGetTokenResponse response = gson.fromJson(line, EfergyEngageGetTokenResponse.class);
-            logger.info("Efergy login response: {}", line);
+            logger.debug("Efergy login response: {}", line);
 
             if (response.getStatus().equals("ok")) {
                 token = response.getToken();
@@ -144,7 +148,7 @@ public class EfergyEngageHandler extends BaseThingHandler {
         EfergyEngageMeasurement measurement = new EfergyEngageMeasurement();
 
         try {
-            url = EFERGY_URL + "/mobile_proxy/getInstant?token=" + token;
+            url = EFERGY_URL + "/mobile_proxy/getCurrentValuesSummary?token=" + token;
             URL valueUrl = new URL(url);
             URLConnection connection = valueUrl.openConnection();
             connection.setReadTimeout(READ_TIMEOUT);
@@ -153,14 +157,25 @@ public class EfergyEngageHandler extends BaseThingHandler {
             String line = readResponse(connection);
 
             //read value
-            EfergyEngageGetInstantResponse response = gson.fromJson(line, EfergyEngageGetInstantResponse.class);
-            if (response.getError() == null) {
-                measurement.setValue(response.getReading());
-                measurement.setMilis(response.getLastReadingTime());
-            } else {
-                logger.error("{} - {}", response.getError().getDesc(), response.getError().getMore());
-            }
+            EfergyEngageData[] data = gson.fromJson(line, EfergyEngageData[].class);
 
+            if (data.length == 0) {
+                logger.error("Null data received: {}", line);
+                return null;
+            }
+            for (int i = 0; i < data.length; i++) {
+                EfergyEngageData pwer = data[i];
+                if (!pwer.getCid().equals("PWER")) {
+                    continue;
+                }
+                JsonArray dataArray = pwer.getData();
+                JsonObject obj = dataArray.get(0).getAsJsonObject();
+                for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
+                    measurement.setValue(entry.getValue().getAsFloat());
+                    measurement.setMilis(System.currentTimeMillis() - 1000 * pwer.getAge());
+                    return measurement;
+                }
+            }
         } catch (MalformedURLException e) {
             logger.error("The URL '{}' is malformed", url, e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR);

@@ -8,6 +8,12 @@
  */
 package org.openhab.binding.efergyengage.internal.model;
 
+/**
+ * The {@link EfergyEngageError} represents the model of
+ * the efergy engage error.
+ *
+ * @author Ondrej Pecta - Initial contribution
+ */
 public class EfergyEngageError {
     private String desc;
     private String more;

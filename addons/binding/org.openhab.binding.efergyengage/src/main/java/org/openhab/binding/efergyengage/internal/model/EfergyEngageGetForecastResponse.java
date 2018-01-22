@@ -9,7 +9,7 @@
 package org.openhab.binding.efergyengage.internal.model;
 
 /**
- * The {@link EfergyEngageGetInstantResponse} represents the model of
+ * The {@link EfergyEngageGetForecastResponse} represents the model of
  * the monthly money spending estimation response.
  *
  * @author Ondrej Pecta - Initial contribution

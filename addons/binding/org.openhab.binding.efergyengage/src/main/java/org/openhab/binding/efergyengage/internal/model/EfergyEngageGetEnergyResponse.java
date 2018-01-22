@@ -9,7 +9,7 @@
 package org.openhab.binding.efergyengage.internal.model;
 
 /**
- * The {@link EfergyEngageGetInstantResponse} represents the model of
+ * The {@link EfergyEngageGetEnergyResponse} represents the model of
  * the response of total power consumptions.
  *
  * @author Ondrej Pecta - Initial contribution

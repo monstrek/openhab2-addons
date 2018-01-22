@@ -8,26 +8,28 @@
  */
 package org.openhab.binding.efergyengage.internal.model;
 
+import com.google.gson.JsonArray;
+
 /**
- * The {@link EfergyEngageGetInstantResponse} represents the model of
- * the response of getting instant power consumption.
+ * The {@link EfergyEngageData} represents the model of
+ * the efergy engage data.
  *
  * @author Ondrej Pecta - Initial contribution
  */
-public class EfergyEngageGetInstantResponse {
-    int reading;
-    long last_reading_time;
-    EfergyEngageError error;
+public class EfergyEngageData {
+    String cid;
+    JsonArray data;
+    Integer age;
 
-    public int getReading() {
-        return reading;
+    public String getCid() {
+        return cid;
     }
 
-    public long getLastReadingTime() {
-        return last_reading_time;
+    public JsonArray getData() {
+        return data;
     }
 
-    public EfergyEngageError getError() {
-        return error;
+    public Integer getAge() {
+        return age;
     }
 }
