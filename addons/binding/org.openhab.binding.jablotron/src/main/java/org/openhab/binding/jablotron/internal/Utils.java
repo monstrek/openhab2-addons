@@ -12,6 +12,8 @@ import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Calendar;
+import java.util.Date;
 
 public class Utils {
     public static String getSessionCookie(HttpsURLConnection connection) {
@@ -46,5 +48,11 @@ public class Utils {
 
     public static String getBrowserTimestamp() {
         return "_=" + System.currentTimeMillis();
+    }
+
+    public static int getHoursOfDay() {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        return cal.get(Calendar.HOUR_OF_DAY);
     }
 }

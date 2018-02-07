@@ -60,7 +60,7 @@ public class JablotronOasisHandler extends BaseThingHandler {
     private int stavPGY = 0;
     private boolean controlDisabled = true;
     private boolean inService = true;
-    private int lastHours = -1;
+    private int lastHours = Utils.getHoursOfDay();
 
     ScheduledFuture<?> future = null;
 
@@ -188,9 +188,7 @@ public class JablotronOasisHandler extends BaseThingHandler {
 
         try {
             // relogin every hour
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(new Date());
-            int hours = cal.get(Calendar.HOUR_OF_DAY);
+            int hours = Utils.getHoursOfDay();
             if (lastHours >= 0 && lastHours != hours) {
                 relogin();
             } else {
@@ -338,8 +336,8 @@ public class JablotronOasisHandler extends BaseThingHandler {
                 initializeService();
                 break;
             case 200:
-                scheduler.schedule((Runnable) this::updateAlarmStatus, 0, TimeUnit.SECONDS);
-                scheduler.schedule((Runnable) this::updateAlarmStatus, 10, TimeUnit.SECONDS);
+                scheduler.schedule((Runnable) this::updateAlarmStatus, 1, TimeUnit.SECONDS);
+                scheduler.schedule((Runnable) this::updateAlarmStatus, 15, TimeUnit.SECONDS);
                 break;
             default:
                 logger.error("Unknown status code received: {}", status);
@@ -416,8 +414,8 @@ public class JablotronOasisHandler extends BaseThingHandler {
         connection.setRequestProperty("Accept-Language", "cs-CZ");
         connection.setRequestProperty("Accept-Encoding", "gzip, deflate");
         connection.setUseCaches(false);
-        //connection.setReadTimeout(30 * 1000);
-        //connection.setConnectTimeout(5 * 1000);
+        connection.setReadTimeout(15 * 1000);
+        connection.setConnectTimeout(3 * 1000);
     }
 
     private synchronized void login() {
