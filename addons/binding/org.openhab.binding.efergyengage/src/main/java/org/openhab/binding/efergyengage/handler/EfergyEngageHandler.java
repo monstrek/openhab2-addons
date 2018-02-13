@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2017 by the respective copyright holders.
+ * Copyright (c) 2010-2018 by the respective copyright holders.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,6 +12,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.smarthome.core.cache.ExpiringCacheMap;
 import org.eclipse.smarthome.core.library.types.DateTimeType;
 import org.eclipse.smarthome.core.library.types.DecimalType;
@@ -102,45 +103,17 @@ public class EfergyEngageHandler extends BaseThingHandler {
     }
 
     private void login() {
-        String url = null;
 
-        try {
-            String email = thingConfig.getEmail();
-            String password = thingConfig.getPassword();
-            String device = thingConfig.getDevice();
-
-            url = EFERGY_URL + "/mobile/get_token?device=" + device + "&username=" + email
-                    + "&password=" + password;
-
-            URL tokenUrl = new URL(url);
-            URLConnection connection = tokenUrl.openConnection();
-            connection.setReadTimeout(READ_TIMEOUT);
-            connection.setConnectTimeout(CONNECT_TIMEOUT);
-
-            String line = readResponse(connection);
-
-            EfergyEngageGetTokenResponse response = gson.fromJson(line, EfergyEngageGetTokenResponse.class);
-            logger.debug("Efergy login response: {}", line);
-
-            if (response.getStatus().equals("ok")) {
-                token = response.getToken();
-                logger.debug("Efergy token: {}", token);
+        if(StringUtils.isNotBlank(thingConfig.getToken())) {
+            token = thingConfig.getToken();
+            EfergyEngageMeasurement measurement = readInstant();
+            if(measurement.getMilis() > 0) {
                 updateStatus(ThingStatus.ONLINE);
-            } else {
-                logger.error("Efergy login response: {}", line);
-                throw new EfergyEngageException(response.getDesc());
             }
-
-        } catch (MalformedURLException e) {
-            logger.error("The URL '{}' is malformed", url, e);
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR);
-        } catch (EfergyEngageException e) {
-            logger.error("Bad login response", e);
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Can not access device as username and/or password are invalid");
-        } catch (Exception e) {
-            logger.error("Cannot get Efergy Engage token", e);
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR);
+            return;
         }
+
+        updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Please configure an application token!");
     }
 
     private EfergyEngageMeasurement readInstant() {
