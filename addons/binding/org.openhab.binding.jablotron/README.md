@@ -48,44 +48,50 @@ The oasis thing exposes these channels:
 ## Full Example
 
 #items file
+
 ```
-String  HouseArm "Arm [%s]" <alarm>
-String  JablotronCode { jablotron="code", autoupdate="false" }
-Contact HouseAlarm "Alarm [%s]" <alarm> { jablotron="alarm" }
-Switch	ArmSectionA	"Garage arming"	<jablotron>	(Alarm)	{ jablotron="A" }
-Switch	ArmSectionAB	"1st floor arming"	<jablotron>	(Alarm)	{ jablotron="B" }
-Switch	ArmSectionABC	"2nd floor arming"	<jablotron>	(Alarm)	{ jablotron="ABC" }
-DateTime LastArmEvent "Last event [%1$td.%1$tm.%1$tY %1$tR]" <clock> { jablotron="lasteventtime" }
-Switch	ArmControlPGX	"PGX"	<jablotron>	(Alarm)	{ jablotron="PGX" }
-Switch	ArmControlPGY	"PGY"	<jablotron>	(Alarm)	{ jablotron="PGY" }
+String  HouseAlarm "Alarm [%s]" <alarm>
+String JablotronCode { channel="jablotron:oasis:8c93a5ed:50139:command", autoupdate="false" }
+Switch	ArmSectionA	"Garage arming"	<jablotron>	(Alarm)	{ channel="jablotron:oasis:8c93a5ed:50139:statusA" }
+Switch	ArmSectionAB	"1st floor arming"	<jablotron>	(Alarm)	{ channel="jablotron:oasis:8c93a5ed:50139:statusB" }
+Switch	ArmSectionABC	"2nd floor arming"	<jablotron>	(Alarm)	{ channel="jablotron:oasis:8c93a5ed:50139:statusABC" }
+String LastEvent "Last event code [%s]" <jablotron> { channel="jablotron:oasis:8c93a5ed:50139:lastEvent" }
+DateTime LastEventTime "Last event [%1$td.%1$tm.%1$tY %1$tR]" <clock> { channel="jablotron:oasis:8c93a5ed:50139:lastEventTime" }
+DateTime LastCheckTime "Last check [%1$td.%1$tm.%1$tY %1$tR]" <clock> { channel="jablotron:oasis:8c93a5ed:50139:lastCheckTime" }
+Switch	ArmControlPGX	"PGX"	<jablotron>	(Alarm)	{ channel="jablotron:oasis:8c93a5ed:50139:statusPGX" }
+Switch	ArmControlPGY	"PGY"	<jablotron>	(Alarm)	{ channel="jablotron:oasis:8c93a5ed:50139:statusPGY" }
 ```
 
 #sitemap example
+
 ```
-Text item=HouseArm icon="alarm" {
-    Switch item=ArmSectionA
-    Switch item=ArmSectionAB
-    Switch item=ArmSectionABC
-    Text item=LastArmEvent
-    Switch item=ArmControlPGX
-    Switch item=ArmControlPGY
-    Switch item=JablotronCode label="Arm" mappings=[1111=" A ",2222=" B ",3333="ABC"]
-    Switch item=JablotronCode label="Disarm" mappings=[5555="Disarm"]
-}
+Text item=HouseAlarm icon="alarm" {
+            Switch item=ArmSectionA
+            Switch item=ArmSectionAB
+            Switch item=ArmSectionABC
+            Text item=LastEvent
+            Text item=LastEventTime
+            Text item=LastCheckTime
+            Switch item=ArmControlPGX
+            Switch item=ArmControlPGY
+            Switch item=JablotronCode label="Arm" mappings=[1234=" A ",2345=" B ",3456="ABC"]
+            Switch item=JablotronCode label="Disarm" mappings=[9876="Disarm"]
+      }
 ```
 
 #rule example
+
 ```
-rule "Arm"
+rule "Alarm"
 when 
   Item ArmSectionA changed or Item ArmSectionAB changed or Item ArmSectionABC changed or 
   System started
 then
-   if( ArmSectionA.state.toString == "ON" || ArmSectionAB.state.toString == "ON" || ArmSectionABC.state.toString == "ON")
-   {   postUpdate(HouseArm, "partial")  }
-   if( ArmSectionA.state.toString == "OFF" && ArmSectionAB.state.toString == "OFF" && ArmSectionABC.state.toString == "OFF")
-   {   postUpdate(HouseArm, "disarmed") }
-   if( ArmSectionA.state.toString == "ON" && ArmSectionAB.state.toString == "ON" && ArmSectionABC.state.toString == "ON")
-   {   postUpdate(HouseArm, "armed")    }
+   if( ArmSectionA.state == ON || ArmSectionAB.state == ON || ArmSectionABC.state == ON)
+   {   postUpdate(HouseAlarm, "partial")  }
+   if( ArmSectionA.state == OFF && ArmSectionAB.state == OFF && ArmSectionABC.state == OFF)
+   {   postUpdate(HouseAlarm, "disarmed") }
+   if( ArmSectionA.state == ON && ArmSectionAB.state == ON && ArmSectionABC.state == ON)
+   {   postUpdate(HouseAlarm, "armed")    }
 end
 ```
