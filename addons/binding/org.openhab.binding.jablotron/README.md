@@ -1,52 +1,91 @@
-# <bindingName> Binding
+# Jablotron Alarm Binding
 
-_Give some details about what this binding is meant for - a protocol, system, specific device._
-
-_If possible, provide some resources like pictures, a YouTube video, etc. to give an impression of what can be done with this binding. You can place such resources into a `doc` folder next to this README.md._
+This is the OH2.x binding for Jablotron alarms.
+https://www.jablotron.com/en/jablotron-products/alarms/
 
 ## Supported Things
 
-_Please describe the different supported things / devices within this section._
-_Which different types are supported, which models were tested etc.?_
-_Note that it is planned to generate some part of this based on the XML files within ```ESH-INF/thing``` of your binding._
+* bridge (the bridge to your jablonet cloud account)
+* JA-80 OASIS alarm
+ 
+Please contact me if you want to add other alarms (e.g. JA-100 etc)
 
 ## Discovery
 
-_Describe the available auto-discovery features here. Mention for what it works and what needs to be kept in mind when using it._
+This binding support auto discovery. Just manually add bridge thing and supply login & password to your Jablonet account.
 
 ## Binding Configuration
 
-_If your binding requires or supports general configuration settings, please create a folder ```cfg``` and place the configuration file ```<bindingId>.cfg``` inside it. In this section, you should link to this file and provide some information about the options. The file could e.g. look like:_
-
-```
-# Configuration for the Philips Hue Binding
-#
-# Default secret key for the pairing of the Philips Hue Bridge.
-# It has to be between 10-40 (alphanumeric) characters 
-# This may be changed by the user for security reasons.
-secret=EclipseSmartHome
-```
-
-_Note that it is planned to generate some part of this based on the information that is available within ```ESH-INF/binding``` of your binding._
-
-_If your binding does not offer any generic configurations, you can remove this section completely._
+Binding itself doesn't require specific configuration.
 
 ## Thing Configuration
 
-_Describe what is needed to manually configure a thing, either through the (Paper) UI or via a thing-file. This should be mainly about its mandatory and optional configuration parameters. A short example entry for a thing file can help!_
+The bridge thing requires this configuration:
+* login (login to your jablonet account)
+* password (password to your jablonet account)
 
-_Note that it is planned to generate some part of this based on the XML files within ```ESH-INF/thing``` of your binding._
+The oasis thing require this configuration (it is better to have it autodiscovered):
+* serviceId (Jablotron internal service id of your alarm)
+* url (an initialization url for the alarm)
+* refresh (thing status refresh period in seconds)
 
 ## Channels
 
-_Here you should provide information about available channel types, what their meaning is and how they can be used._
+The bridge thing does not have any channels.
+The oasis thing exposes these channels:
 
-_Note that it is planned to generate some part of this based on the XML files within ```ESH-INF/thing``` of your binding._
+* statusA (the status of A section)
+* statusB (the status of AB/B section)
+* statusABC (the status of ABC section)
+* statusPGX (the status of PGX)
+* statusPGY (the status of PGY)
+* command (the channel for sending codes to alarm)
+* lastEvent (the code of the last checking)
+* lastEventTime (the time of the last event)
+* lastCheckTime (the time of the last checking)
+* alarm (the alarm status OFF/ON)
 
 ## Full Example
 
-_Provide a full usage example based on textual configuration files (*.things, *.items, *.sitemap)._
+#items file
+```
+String  HouseArm "Arm [%s]" <alarm>
+String  JablotronCode { jablotron="code", autoupdate="false" }
+Contact HouseAlarm "Alarm [%s]" <alarm> { jablotron="alarm" }
+Switch	ArmSectionA	"Garage arming"	<jablotron>	(Alarm)	{ jablotron="A" }
+Switch	ArmSectionAB	"1st floor arming"	<jablotron>	(Alarm)	{ jablotron="B" }
+Switch	ArmSectionABC	"2nd floor arming"	<jablotron>	(Alarm)	{ jablotron="ABC" }
+DateTime LastArmEvent "Last event [%1$td.%1$tm.%1$tY %1$tR]" <clock> { jablotron="lasteventtime" }
+Switch	ArmControlPGX	"PGX"	<jablotron>	(Alarm)	{ jablotron="PGX" }
+Switch	ArmControlPGY	"PGY"	<jablotron>	(Alarm)	{ jablotron="PGY" }
+```
 
-## Any custom content here!
+#sitemap example
+```
+Text item=HouseArm icon="alarm" {
+    Switch item=ArmSectionA
+    Switch item=ArmSectionAB
+    Switch item=ArmSectionABC
+    Text item=LastArmEvent
+    Switch item=ArmControlPGX
+    Switch item=ArmControlPGY
+    Switch item=JablotronCode label="Arm" mappings=[1111=" A ",2222=" B ",3333="ABC"]
+    Switch item=JablotronCode label="Disarm" mappings=[5555="Disarm"]
+}
+```
 
-_Feel free to add additional sections for whatever you think should also be mentioned about your binding!_
+#rule example
+```
+rule "Arm"
+when 
+  Item ArmSectionA changed or Item ArmSectionAB changed or Item ArmSectionABC changed or 
+  System started
+then
+   if( ArmSectionA.state.toString == "ON" || ArmSectionAB.state.toString == "ON" || ArmSectionABC.state.toString == "ON")
+   {   postUpdate(HouseArm, "partial")  }
+   if( ArmSectionA.state.toString == "OFF" && ArmSectionAB.state.toString == "OFF" && ArmSectionABC.state.toString == "OFF")
+   {   postUpdate(HouseArm, "disarmed") }
+   if( ArmSectionA.state.toString == "ON" && ArmSectionAB.state.toString == "ON" && ArmSectionABC.state.toString == "ON")
+   {   postUpdate(HouseArm, "armed")    }
+end
+```
