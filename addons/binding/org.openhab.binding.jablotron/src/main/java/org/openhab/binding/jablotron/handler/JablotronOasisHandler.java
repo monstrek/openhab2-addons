@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import javax.net.ssl.HttpsURLConnection;
 import java.io.DataOutputStream;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -177,6 +178,9 @@ public class JablotronOasisHandler extends BaseThingHandler {
 
             String line = Utils.readResponse(connection);
             return gson.fromJson(line, JablotronStatusResponse.class);
+        } catch (SocketTimeoutException ste) {
+            logger.error("Timeout during getting alarm status!");
+            return null;
         } catch (Exception e) {
             logger.error("sendGetStatusRequest exception", e);
             return null;
@@ -414,8 +418,8 @@ public class JablotronOasisHandler extends BaseThingHandler {
         connection.setRequestProperty("Accept-Language", "cs-CZ");
         connection.setRequestProperty("Accept-Encoding", "gzip, deflate");
         connection.setUseCaches(false);
-        connection.setReadTimeout(15 * 1000);
-        connection.setConnectTimeout(3 * 1000);
+        connection.setReadTimeout(READ_TIMEOUT);
+        connection.setConnectTimeout(CONNECT_TIMEOUT);
     }
 
     private synchronized void login() {

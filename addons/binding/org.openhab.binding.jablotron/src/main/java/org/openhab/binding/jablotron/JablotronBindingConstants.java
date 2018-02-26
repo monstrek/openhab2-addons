@@ -42,5 +42,8 @@ public class JablotronBindingConstants {
     public static final String JABLOTRON_URL = "https://www.jablonet.net/";
     public static final String OASIS_SERVICE_URL = "app/oasis?service=";
     public static final String AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.59 Safari/537.36";
+    public static final int READ_TIMEOUT = 15 * 1000;
+    public static final int CONNECT_TIMEOUT = 5 * 1000;
+
 
 }

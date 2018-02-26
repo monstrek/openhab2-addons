@@ -194,7 +194,7 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
                 if (response.getWidgets().get(i).getTemplateService().equals(THING_TYPE_OASIS.getId())) {
                     discoveryService.oasisDiscovered("Jablotron OASIS Alarm", serviceId, url);
                 } else {
-                    logger.error("Unsupported device type discovered: {}", response.getWidgets().get(i).getTemplateService());
+                    logger.error("Unsupported device type discovered: {} with serviceId: {} and url: {}", response.getWidgets().get(i).getTemplateService(), serviceId, url);
                 }
             }
         } catch (Exception ex) {
