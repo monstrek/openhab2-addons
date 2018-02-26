@@ -20,6 +20,8 @@
 			<channel id="statusPGY" typeId="statusPGY"/>
 			<channel id="command" typeId="command"/>
 			<channel id="lastEvent" typeId="lastEvent"/>
+			<channel id="lastEventCode" typeId="lastEventCode"/>
+			<channel id="lastEventClass" typeId="lastEventClass"/>
 			<channel id="lastEventTime" typeId="lastEventTime"/>
 			<channel id="lastCheckTime" typeId="lastCheckTime"/>
 			<channel id="alarm" typeId="alarm"/>
@@ -86,8 +88,24 @@
 	<!-- LastEvent -->
 	<channel-type id="lastEvent">
 		<item-type>Text</item-type>
+		<label>OASIS Last Event Text Description Channel</label>
+		<description>Text description of the last event of your OASIS alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
+
+	<!-- LastEventCode -->
+	<channel-type id="lastEventCode">
+		<item-type>Text</item-type>
 		<label>OASIS Last Event Code Channel</label>
-		<description>Code of last event of your OASIS alarm</description>
+		<description>Code of the last event of your OASIS alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
+
+	<!-- LastEventClass -->
+	<channel-type id="lastEventClass">
+		<item-type>Text</item-type>
+		<label>OASIS Last Event Class Channel</label>
+		<description>Class of the last event of your OASIS alarm (arm, disarm, ...)</description>
 		<state readOnly="true"/>
 	</channel-type>
 
@@ -95,7 +113,7 @@
 	<channel-type id="lastEventTime">
 		<item-type>DateTime</item-type>
 		<label>OASIS Last Event Time Channel</label>
-		<description>Date and time of last event of your OASIS alarm</description>
+		<description>Date and time of the last event of your OASIS alarm</description>
 		<state readOnly="true"/>
 	</channel-type>
 

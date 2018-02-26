@@ -40,7 +40,9 @@ The oasis thing exposes these channels:
 * statusPGX (the status of PGX)
 * statusPGY (the status of PGY)
 * command (the channel for sending codes to alarm)
-* lastEvent (the code of the last checking)
+* lastEvent (the text description of the last event)
+* lastEventCode (the code of the last event)
+* lastEventClass (the class of the last event - arm, disarm, service)
 * lastEventTime (the time of the last event)
 * lastCheckTime (the time of the last checking)
 * alarm (the alarm status OFF/ON)
@@ -70,6 +72,8 @@ Text item=HouseAlarm icon="alarm" {
             Switch item=ArmSectionAB
             Switch item=ArmSectionABC
             Text item=LastEvent
+            Text item=LastEventCode
+            Text item=LastEventClass
             Text item=LastEventTime
             Text item=LastCheckTime
             Switch item=ArmControlPGX

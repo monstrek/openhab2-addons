@@ -8,7 +8,7 @@
  */
 package org.openhab.binding.jablotron.handler;
 
-import com.google.gson.Gson;
+import com.google.gson.*;
 import org.eclipse.smarthome.core.library.types.DateTimeType;
 import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.OpenClosedType;
@@ -32,9 +32,9 @@ import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -149,7 +149,8 @@ public class JablotronOasisHandler extends BaseThingHandler {
                     if (lastEvent != null) {
                         Calendar cal = Calendar.getInstance();
                         cal.setTime(lastEvent);
-                        newState = new DateTimeType(cal);
+                        ZonedDateTime zdt = ZonedDateTime.ofInstant(cal.toInstant(), ZoneId.systemDefault());
+                        newState = new DateTimeType(zdt);
                     }
                     break;
                 default:
@@ -219,7 +220,16 @@ public class JablotronOasisHandler extends BaseThingHandler {
                 ArrayList<JablotronEvent> events = response.getEvents();
                 for (JablotronEvent event : events) {
                     logger.debug("Found event: {} {} {}", event.getDatum(), event.getCode(), event.getEvent());
-                    updateLastEvent(event.getCode());
+                    updateLastEvent(event);
+
+                }
+            } else {
+                ArrayList<JablotronEvent> history = getServiceHistory();
+                logger.debug("History log contains {} events", history.size());
+                if (history.size() > 0) {
+                    JablotronEvent event = history.get(0);
+                    updateLastEvent(event);
+                    logger.debug("Last event: {} is of class: {} has code: {}", event.getEvent(), event.getEventClass(), event.getCode());
                 }
             }
 
@@ -240,7 +250,8 @@ public class JablotronOasisHandler extends BaseThingHandler {
             for (Channel channel : getThing().getChannels()) {
                 String type = channel.getUID().getId();
                 if (type.equals(CHANNEL_LAST_CHECK_TIME)) {
-                    State status = new DateTimeType(Calendar.getInstance());
+                    ZonedDateTime zdt = ZonedDateTime.ofInstant(Calendar.getInstance().toInstant(), ZoneId.systemDefault());
+                    State status = new DateTimeType(zdt);
                     updateState(channel.getUID(), status);
                 }
             }
@@ -259,10 +270,25 @@ public class JablotronOasisHandler extends BaseThingHandler {
         initializeService(false);
     }
 
-    private void updateLastEvent(String code) {
+    private void updateLastEvent(JablotronEvent event) {
+        updateChannel(CHANNEL_LAST_EVENT_CODE, event.getCode());
+        updateChannel(CHANNEL_LAST_EVENT, event.getEvent());
+        updateChannel(CHANNEL_LAST_EVENT_CLASS, event.getEventClass());
+    }
+
+    /*
+    private void updateLastEventCode(String code) {
         for (Channel channel : getThing().getChannels()) {
-            if (channel.getUID().getId().equals(CHANNEL_LAST_EVENT)) {
+            if (channel.getUID().getId().equals(CHANNEL_LAST_EVENT_CODE)) {
                 updateState(channel.getUID(), new StringType(code));
+            }
+        }
+    }*/
+
+    private void updateChannel(String channelName, String text) {
+        for (Channel channel : getThing().getChannels()) {
+            if (channel.getUID().getId().equals(channelName)) {
+                updateState(channel.getUID(), new StringType(text));
             }
         }
     }
@@ -503,7 +529,6 @@ public class JablotronOasisHandler extends BaseThingHandler {
                     logger.debug("Jablotron OASIS service: {} successfully initialized", serviceId);
                 }
                 updateStatus(ThingStatus.ONLINE);
-
             } else {
                 logger.error("Cannot initialize Jablotron service: {}", serviceId);
                 logger.error("Got response code: {}", connection.getResponseCode());
@@ -514,4 +539,48 @@ public class JablotronOasisHandler extends BaseThingHandler {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Cannot initialize OASIS service");
         }
     }
+
+    private ArrayList<JablotronEvent> getServiceHistory() {
+        String serviceId = thingConfig.getServiceId();
+        try {
+            URL cookieUrl = new URL("https://www.jablonet.net/app/oasis/ajax/historie.php");
+            String urlParameters = "from=this_month&to=&gps=0&log=0&header=0";
+            byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+
+            HttpsURLConnection connection = (HttpsURLConnection) cookieUrl.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Referer", JABLOTRON_URL);
+            connection.setRequestProperty("Cookie", session);
+            connection.setRequestProperty("Content-Length", Integer.toString(postData.length));
+            connection.setRequestProperty("X-Requested-With", "XMLHttpRequest");
+            setConnectionDefaults(connection);
+            try (DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
+                wr.write(postData);
+            }
+            String line = Utils.readResponse(connection);
+            logger.debug("History: {}", line);
+
+            ArrayList<JablotronEvent> result = new ArrayList<>();
+
+            JsonParser parser = new JsonParser();
+            JsonObject jobject = parser.parse(line).getAsJsonObject();
+            if (jobject.has("events")) {
+                jobject = jobject.get("events").getAsJsonObject();
+
+                for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
+                    String key = entry.getKey();
+                    if (jobject.get(key) instanceof JsonArray) {
+                        JablotronEvent[] events = gson.fromJson(jobject.get(key), JablotronEvent[].class);
+                        result.addAll(Arrays.asList(events));
+                    }
+                }
+            }
+            return result;
+        } catch (Exception ex) {
+            logger.error("Cannot get Jablotron service history: {}", serviceId, ex);
+        }
+        return null;
+    }
+
 }

@@ -8,11 +8,16 @@
  */
 package org.openhab.binding.jablotron.model;
 
+import com.google.gson.annotations.SerializedName;
+
 public class JablotronEvent {
     private String datum;
     private long time;
     private String code;
     private String event;
+
+    @SerializedName("ev_class")
+    private String eventClass;
 
     public String getDatum() {
         return datum;
@@ -28,5 +33,9 @@ public class JablotronEvent {
 
     public String getEvent() {
         return event;
+    }
+
+    public String getEventClass() {
+        return eventClass;
     }
 }

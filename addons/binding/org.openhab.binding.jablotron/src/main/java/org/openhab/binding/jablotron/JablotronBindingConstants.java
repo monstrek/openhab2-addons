@@ -34,6 +34,8 @@ public class JablotronBindingConstants {
     public static final String CHANNEL_COMMAND = "command";
     public static final String CHANNEL_ALARM = "alarm";
     public static final String CHANNEL_LAST_EVENT = "lastEvent";
+    public static final String CHANNEL_LAST_EVENT_CODE = "lastEventCode";
+    public static final String CHANNEL_LAST_EVENT_CLASS = "lastEventClass";
     public static final String CHANNEL_LAST_EVENT_TIME = "lastEventTime";
     public static final String CHANNEL_LAST_CHECK_TIME = "lastCheckTime";
 
