@@ -41,19 +41,16 @@ import java.util.concurrent.TimeUnit;
 import static org.openhab.binding.jablotron.JablotronBindingConstants.*;
 
 /**
- * The {@link JablotronOasisHandler} is responsible for handling commands, which are
+ * The {@link JablotronJa100Handler} is responsible for handling commands, which are
  * sent to one of the channels.
  *
  * @author Ondrej Pecta - Initial contribution
  */
-public class JablotronOasisHandler extends JablotronAlarmHandler {
+public class JablotronJa100Handler extends JablotronAlarmHandler {
 
-    private final Logger logger = LoggerFactory.getLogger(JablotronOasisHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(JablotronJa100Handler.class);
 
-    private int stavPGX = 0;
-    private int stavPGY = 0;
-
-    public JablotronOasisHandler(Thing thing) {
+    public JablotronJa100Handler(Thing thing) {
         super(thing);
     }
 
@@ -100,14 +97,9 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         stavB = response.getSekce().get(1).getStav();
         stavABC = response.getSekce().get(2).getStav();
 
-        stavPGX = response.getPgm().get(0).getStav();
-        stavPGY = response.getPgm().get(1).getStav();
-
         logger.debug("Stav A: {}", stavA);
         logger.debug("Stav B: {}", stavB);
         logger.debug("Stav ABC: {}", stavABC);
-        logger.debug("Stav PGX: {}", stavPGX);
-        logger.debug("Stav PGY: {}", stavPGY);
 
         for (Channel channel : getThing().getChannels()) {
             State newState = null;
@@ -122,12 +114,6 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
                     break;
                 case CHANNEL_STATUS_ABC:
                     newState = (stavABC == 1) ? OnOffType.ON : OnOffType.OFF;
-                    break;
-                case CHANNEL_STATUS_PGX:
-                    newState = (stavPGX == 1) ? OnOffType.ON : OnOffType.OFF;
-                    break;
-                case CHANNEL_STATUS_PGY:
-                    newState = (stavPGY == 1) ? OnOffType.ON : OnOffType.OFF;
                     break;
                 case CHANNEL_ALARM:
                     newState = (response.isAlarm()) ? OpenClosedType.OPEN : OpenClosedType.CLOSED;
@@ -154,18 +140,19 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
 
     private synchronized JablotronStatusResponse sendGetStatusRequest() {
 
-        String url = JABLOTRON_URL + "app/oasis/ajax/stav.php?" + Utils.getBrowserTimestamp();
+        String url = JABLOTRON_URL + "app/ja100/ajax/stav.php?" + Utils.getBrowserTimestamp();
         try {
             URL cookieUrl = new URL(url);
 
             HttpsURLConnection connection = (HttpsURLConnection) cookieUrl.openConnection();
             connection.setRequestMethod("GET");
-            connection.setRequestProperty("Referer", JABLOTRON_URL + OASIS_SERVICE_URL + thingConfig.getServiceId());
+            connection.setRequestProperty("Referer", JABLOTRON_URL + JA100_SERVICE_URL + thingConfig.getServiceId());
             connection.setRequestProperty("Cookie", session);
             connection.setRequestProperty("X-Requested-With", "XMLHttpRequest");
             setConnectionDefaults(connection);
 
             String line = Utils.readResponse(connection);
+            logger.info("getStatus response: {}", line);
             return gson.fromJson(line, JablotronStatusResponse.class);
         } catch (SocketTimeoutException ste) {
             logger.error("Timeout during getting alarm status!");
@@ -200,7 +187,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
                 response = sendGetStatusRequest();
             }
             if (response.isBusyStatus()) {
-                logger.warn("OASIS is busy...giving up");
+                logger.warn("JA100 is busy...giving up");
                 logout();
                 return false;
             }
@@ -357,7 +344,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         String url;
 
         try {
-            url = JABLOTRON_URL + "app/oasis/ajax/ovladani.php";
+            url = JABLOTRON_URL + "app/ja100/ajax/ovladani.php";
             String urlParameters = "section=STATE&status=" + ((code.isEmpty()) ? "1" : "") + "&code=" + code;
             byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
@@ -376,6 +363,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
                 wr.write(postData);
             }
             String line = Utils.readResponse(connection);
+            logger.info("sendUserCode response: {}", line);
             response = gson.fromJson(line, JablotronControlResponse.class);
 
             logger.debug("sendUserCode result: {}", response.getVysledek());
@@ -394,7 +382,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
 
             HttpsURLConnection connection = (HttpsURLConnection) cookieUrl.openConnection();
             connection.setRequestMethod("GET");
-            connection.setRequestProperty("Referer", JABLOTRON_URL + OASIS_SERVICE_URL + thingConfig.getServiceId());
+            connection.setRequestProperty("Referer", JABLOTRON_URL + JA100_SERVICE_URL + thingConfig.getServiceId());
             connection.setRequestProperty("Cookie", session);
             connection.setRequestProperty("Upgrade-Insecure-Requests", "1");
             setConnectionDefaults(connection);
@@ -435,8 +423,6 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
             stavA = 0;
             stavB = 0;
             stavABC = 0;
-            stavPGX = 0;
-            stavPGY = 0;
 
             JablotronBridgeHandler bridge = (JablotronBridgeHandler) this.getBridge().getHandler();
             if (bridge == null) {
@@ -462,6 +448,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
             }
 
             String line = Utils.readResponse(connection);
+            logger.info("Login response: {}", line);
             JablotronLoginResponse response = gson.fromJson(line, JablotronLoginResponse.class);
 
             if (!response.isOKStatus())
@@ -503,26 +490,26 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
 
             if (connection.getResponseCode() == 200) {
                 if (verbose) {
-                    logger.info("Jablotron OASIS service: {} successfully initialized", serviceId);
+                    logger.info("Jablotron JA100 service: {} successfully initialized", serviceId);
                 } else {
-                    logger.debug("Jablotron OASIS service: {} successfully initialized", serviceId);
+                    logger.debug("Jablotron JA100 service: {} successfully initialized", serviceId);
                 }
                 updateStatus(ThingStatus.ONLINE);
             } else {
                 logger.error("Cannot initialize Jablotron service: {}", serviceId);
-                logger.error("Got response code: {}", connection.getResponseCode());
-                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Cannot initialize OASIS service");
+                logger.error("Got response code: {} and message: {}", connection.getResponseCode(), connection.getResponseMessage());
+                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Cannot initialize JA100 service");
             }
         } catch (Exception ex) {
             logger.error("Cannot initialize Jablotron service: {}", serviceId, ex);
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Cannot initialize OASIS service");
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Cannot initialize JA100 service");
         }
     }
 
     private ArrayList<JablotronEvent> getServiceHistory() {
         String serviceId = thingConfig.getServiceId();
         try {
-            URL cookieUrl = new URL("https://www.jablonet.net/app/oasis/ajax/historie.php");
+            URL cookieUrl = new URL("https://www.jablonet.net/app/ja100/ajax/historie.php");
             String urlParameters = "from=this_month&to=&gps=0&log=0&header=0";
             byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
@@ -538,7 +525,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
                 wr.write(postData);
             }
             String line = Utils.readResponse(connection);
-            logger.debug("History: {}", line);
+            logger.info("History response: {}", line);
 
             ArrayList<JablotronEvent> result = new ArrayList<>();
 

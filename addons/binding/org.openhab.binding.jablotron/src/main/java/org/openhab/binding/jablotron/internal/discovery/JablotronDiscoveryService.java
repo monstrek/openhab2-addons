@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+import static org.openhab.binding.jablotron.JablotronBindingConstants.THING_TYPE_JA100;
 import static org.openhab.binding.jablotron.JablotronBindingConstants.THING_TYPE_OASIS;
 
 public class JablotronDiscoveryService extends AbstractDiscoveryService implements ExtendedDiscoveryService {
@@ -38,7 +39,7 @@ public class JablotronDiscoveryService extends AbstractDiscoveryService implemen
 
     @Override
     public Set<ThingTypeUID> getSupportedThingTypes() {
-        return new HashSet<>(Arrays.asList(THING_TYPE_OASIS));
+        return new HashSet<>(Arrays.asList(THING_TYPE_OASIS, THING_TYPE_JA100));
     }
 
     @Override
@@ -62,6 +63,22 @@ public class JablotronDiscoveryService extends AbstractDiscoveryService implemen
 
         if (discoveryServiceCallback.getExistingThing(thingUID) == null) {
             logger.info("Detected an OASIS alarm with service id: {}", serviceId);
+            thingDiscovered(
+                    DiscoveryResultBuilder.create(thingUID).withThingType(THING_TYPE_OASIS).withProperties(properties)
+                            .withRepresentationProperty("serviceId").withLabel(label)
+                            .withBridge(bridge.getThing().getUID()).build());
+        }
+    }
+
+    public void ja100Discovered(String label, String serviceId, String url) {
+        Map<String, Object> properties = new HashMap<>(1);
+        properties.put("serviceId", serviceId);
+        properties.put("url", url);
+
+        ThingUID thingUID = new ThingUID(THING_TYPE_OASIS, bridge.getThing().getUID(), serviceId);
+
+        if (discoveryServiceCallback.getExistingThing(thingUID) == null) {
+            logger.info("Detected a JA100 alarm with service id: {}", serviceId);
             thingDiscovered(
                     DiscoveryResultBuilder.create(thingUID).withThingType(THING_TYPE_OASIS).withProperties(properties)
                             .withRepresentationProperty("serviceId").withLabel(label)

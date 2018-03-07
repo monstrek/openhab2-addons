@@ -8,7 +8,7 @@
  */
 package org.openhab.binding.jablotron.config;
 
-public class OasisConfig {
+public class DeviceConfig {
     private String serviceId;
     private String url;
     private int refresh;

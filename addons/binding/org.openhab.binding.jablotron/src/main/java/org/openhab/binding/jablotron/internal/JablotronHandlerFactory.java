@@ -16,6 +16,7 @@ import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.openhab.binding.jablotron.handler.JablotronBridgeHandler;
+import org.openhab.binding.jablotron.handler.JablotronJa100Handler;
 import org.openhab.binding.jablotron.handler.JablotronOasisHandler;
 import org.openhab.binding.jablotron.internal.discovery.JablotronDiscoveryService;
 import org.osgi.framework.ServiceRegistration;
@@ -24,6 +25,7 @@ import org.osgi.service.component.annotations.Component;
 import java.util.*;
 
 import static org.openhab.binding.jablotron.JablotronBindingConstants.THING_TYPE_BRIDGE;
+import static org.openhab.binding.jablotron.JablotronBindingConstants.THING_TYPE_JA100;
 import static org.openhab.binding.jablotron.JablotronBindingConstants.THING_TYPE_OASIS;
 
 /**
@@ -35,7 +37,7 @@ import static org.openhab.binding.jablotron.JablotronBindingConstants.THING_TYPE
 @Component(service = ThingHandlerFactory.class, immediate = true)
 public class JablotronHandlerFactory extends BaseThingHandlerFactory {
 
-    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = new HashSet<>(Arrays.asList(THING_TYPE_OASIS, THING_TYPE_BRIDGE));
+    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = new HashSet<>(Arrays.asList(THING_TYPE_OASIS, THING_TYPE_JA100, THING_TYPE_BRIDGE));
     private Map<ThingUID, ServiceRegistration<?>> discoveryServiceRegs = new HashMap<>();
 
 
@@ -56,7 +58,9 @@ public class JablotronHandlerFactory extends BaseThingHandlerFactory {
         if (thingTypeUID.equals(THING_TYPE_OASIS)) {
             return new JablotronOasisHandler(thing);
         }
-
+        if (thingTypeUID.equals(THING_TYPE_JA100)) {
+            return new JablotronJa100Handler(thing);
+        }
 
         return null;
     }
