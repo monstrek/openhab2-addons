@@ -17,7 +17,6 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
     protected int stavA = 0;
     protected int stavB = 0;
     protected int stavABC = 0;
-    protected boolean controlDisabled = true;
     protected boolean inService = true;
     protected int lastHours = Utils.getHoursOfDay();
 

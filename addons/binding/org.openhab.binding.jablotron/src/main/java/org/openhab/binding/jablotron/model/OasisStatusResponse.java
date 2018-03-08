@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 
-public class JablotronStatusResponse {
+public class OasisStatusResponse {
 
     private Gson gson = new Gson();
     private JsonParser parser = new JsonParser();

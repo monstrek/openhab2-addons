@@ -14,15 +14,11 @@ import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.OpenClosedType;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.*;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.jablotron.config.DeviceConfig;
 import org.openhab.binding.jablotron.internal.Utils;
-import org.openhab.binding.jablotron.model.JablotronControlResponse;
-import org.openhab.binding.jablotron.model.JablotronEvent;
-import org.openhab.binding.jablotron.model.JablotronLoginResponse;
-import org.openhab.binding.jablotron.model.JablotronStatusResponse;
+import org.openhab.binding.jablotron.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +31,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static org.openhab.binding.jablotron.JablotronBindingConstants.*;
@@ -53,6 +48,27 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
     public JablotronJa100Handler(Thing thing) {
         super(thing);
     }
+
+    private int stavPGM_1 = 0;
+    private int stavPGM_2 = 0;
+    private int stavPGM_3 = 0;
+    private int stavPGM_4 = 0;
+    private int stavPGM_5 = 0;
+    private int stavPGM_6 = 0;
+    private int stavPGM_7 = 0;
+    private int stavPGM_8 = 0;
+    private int stavPGM_9 = 0;
+    private int stavPGM_10 = 0;
+    private int stavPGM_11 = 0;
+    private int stavPGM_12 = 0;
+    private int stavPGM_13 = 0;
+    private int stavPGM_14 = 0;
+    private int stavPGM_15 = 0;
+    private int stavPGM_16 = 0;
+    private int stavPGM_17 = 0;
+    private int stavPGM_18 = 0;
+    private int stavPGM_19 = 0;
+    private int stavPGM_20 = 0;
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
@@ -89,17 +105,59 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         }, 1, thingConfig.getRefresh(), TimeUnit.SECONDS);
     }
 
-    private void readAlarmStatus(JablotronStatusResponse response) {
+    private void readAlarmStatus(Ja100StatusResponse response) {
         logger.debug("Reading alarm status...");
-        controlDisabled = response.isControlDisabled();
 
-        stavA = response.getSekce().get(0).getStav();
-        stavB = response.getSekce().get(1).getStav();
-        stavABC = response.getSekce().get(2).getStav();
+        stavA = response.getSekceStatus(0);
+        stavB = response.getSekceStatus(1);
 
-        logger.debug("Stav A: {}", stavA);
-        logger.debug("Stav B: {}", stavB);
-        logger.debug("Stav ABC: {}", stavABC);
+        stavPGM_20 = response.getPgmStatus(0);
+        stavPGM_19 = response.getPgmStatus(1);
+        stavPGM_18 = response.getPgmStatus(2);
+        stavPGM_17 = response.getPgmStatus(3);
+        stavPGM_16 = response.getPgmStatus(4);
+        stavPGM_15 = response.getPgmStatus(5);
+        stavPGM_14 = response.getPgmStatus(6);
+        stavPGM_13 = response.getPgmStatus(7);
+        stavPGM_12 = response.getPgmStatus(8);
+        stavPGM_11 = response.getPgmStatus(9);
+        stavPGM_10 = response.getPgmStatus(10);
+        stavPGM_9 = response.getPgmStatus(11);
+        stavPGM_8 = response.getPgmStatus(12);
+        stavPGM_7 = response.getPgmStatus(13);
+        stavPGM_6 = response.getPgmStatus(14);
+        stavPGM_5 = response.getPgmStatus(15);
+        stavPGM_4 = response.getPgmStatus(16);
+        stavPGM_3 = response.getPgmStatus(17);
+        stavPGM_2 = response.getPgmStatus(18);
+        stavPGM_1 = response.getPgmStatus(19);
+
+
+
+        logger.info("Status A: {}", stavA);
+        logger.info("Status B: {}", stavB);
+
+        logger.info("Status 1", stavPGM_1);
+        logger.info("Status 2", stavPGM_2);
+        logger.info("Status 3", stavPGM_3);
+        logger.info("Status 4", stavPGM_4);
+        logger.info("Status 5", stavPGM_5);
+        logger.info("Status 6", stavPGM_6);
+        logger.info("Status 7", stavPGM_7);
+        logger.info("Status 8", stavPGM_8);
+        logger.info("Status 9", stavPGM_9);
+        logger.info("Status 10", stavPGM_10);
+        logger.info("Status 11", stavPGM_11);
+        logger.info("Status 12", stavPGM_12);
+        logger.info("Status 13", stavPGM_13);
+        logger.info("Status 14", stavPGM_14);
+        logger.info("Status 15", stavPGM_15);
+        logger.info("Status 16", stavPGM_16);
+        logger.info("Status 17", stavPGM_17);
+        logger.info("Status 18", stavPGM_18);
+        logger.info("Status 19", stavPGM_19);
+        logger.info("Status 20", stavPGM_20);
+
 
         for (Channel channel : getThing().getChannels()) {
             State newState = null;
@@ -112,12 +170,71 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                 case CHANNEL_STATUS_B:
                     newState = (stavB == 1) ? OnOffType.ON : OnOffType.OFF;
                     break;
-                case CHANNEL_STATUS_ABC:
-                    newState = (stavABC == 1) ? OnOffType.ON : OnOffType.OFF;
+                case CHANNEL_STATUS_PGM_1:
+                    newState = (stavPGM_1 == 1) ? OnOffType.ON : OnOffType.OFF;
                     break;
+                case CHANNEL_STATUS_PGM_2:
+                    newState = (stavPGM_2 == 1) ? OnOffType.ON : OnOffType.OFF;
+                    break;
+                case CHANNEL_STATUS_PGM_3:
+                    newState = (stavPGM_3 == 1) ? OnOffType.ON : OnOffType.OFF;
+                    break;
+                case CHANNEL_STATUS_PGM_4:
+                    newState = (stavPGM_4 == 1) ? OnOffType.ON : OnOffType.OFF;
+                    break;
+                case CHANNEL_STATUS_PGM_5:
+                    newState = (stavPGM_5 == 1) ? OnOffType.ON : OnOffType.OFF;
+                    break;
+                case CHANNEL_STATUS_PGM_6:
+                    newState = (stavPGM_6 == 1) ? OnOffType.ON : OnOffType.OFF;
+                    break;
+                case CHANNEL_STATUS_PGM_7:
+                    newState = (stavPGM_7 == 1) ? OnOffType.ON : OnOffType.OFF;
+                    break;
+                case CHANNEL_STATUS_PGM_8:
+                    newState = (stavPGM_8 == 1) ? OnOffType.ON : OnOffType.OFF;
+                    break;
+                case CHANNEL_STATUS_PGM_9:
+                    newState = (stavPGM_9 == 1) ? OnOffType.ON : OnOffType.OFF;
+                    break;
+                case CHANNEL_STATUS_PGM_10:
+                    newState = (stavPGM_10 == 1) ? OnOffType.ON : OnOffType.OFF;
+                    break;
+                case CHANNEL_STATUS_PGM_11:
+                    newState = (stavPGM_11 == 1) ? OnOffType.ON : OnOffType.OFF;
+                    break;
+                case CHANNEL_STATUS_PGM_12:
+                    newState = (stavPGM_12 == 1) ? OnOffType.ON : OnOffType.OFF;
+                    break;
+                case CHANNEL_STATUS_PGM_13:
+                    newState = (stavPGM_13 == 1) ? OnOffType.ON : OnOffType.OFF;
+                    break;
+                case CHANNEL_STATUS_PGM_14:
+                    newState = (stavPGM_14 == 1) ? OnOffType.ON : OnOffType.OFF;
+                    break;
+                case CHANNEL_STATUS_PGM_15:
+                    newState = (stavPGM_15 == 1) ? OnOffType.ON : OnOffType.OFF;
+                    break;
+                case CHANNEL_STATUS_PGM_16:
+                    newState = (stavPGM_16 == 1) ? OnOffType.ON : OnOffType.OFF;
+                    break;
+                case CHANNEL_STATUS_PGM_17:
+                    newState = (stavPGM_17 == 1) ? OnOffType.ON : OnOffType.OFF;
+                    break;
+                case CHANNEL_STATUS_PGM_18:
+                    newState = (stavPGM_18 == 1) ? OnOffType.ON : OnOffType.OFF;
+                    break;
+                case CHANNEL_STATUS_PGM_19:
+                    newState = (stavPGM_19 == 1) ? OnOffType.ON : OnOffType.OFF;
+                    break;
+                case CHANNEL_STATUS_PGM_20:
+                    newState = (stavPGM_20 == 1) ? OnOffType.ON : OnOffType.OFF;
+                    break;
+                /*
                 case CHANNEL_ALARM:
                     newState = (response.isAlarm()) ? OpenClosedType.OPEN : OpenClosedType.CLOSED;
                     break;
+
                 case CHANNEL_LAST_EVENT_TIME:
                     Date lastEvent = response.getLastEventTime();
                     if (lastEvent != null) {
@@ -127,6 +244,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                         newState = new DateTimeType(zdt);
                     }
                     break;
+                    */
                 default:
                     break;
             }
@@ -138,7 +256,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         }
     }
 
-    private synchronized JablotronStatusResponse sendGetStatusRequest() {
+    private synchronized Ja100StatusResponse sendGetStatusRequest() {
 
         String url = JABLOTRON_URL + "app/ja100/ajax/stav.php?" + Utils.getBrowserTimestamp();
         try {
@@ -153,7 +271,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
 
             String line = Utils.readResponse(connection);
             logger.info("getStatus response: {}", line);
-            return gson.fromJson(line, JablotronStatusResponse.class);
+            return gson.fromJson(line, Ja100StatusResponse.class);
         } catch (SocketTimeoutException ste) {
             logger.error("Timeout during getting alarm status!");
             return null;
@@ -176,12 +294,12 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             }
             lastHours = hours;
 
-            JablotronStatusResponse response = sendGetStatusRequest();
+            Ja100StatusResponse response = sendGetStatusRequest();
 
             if (response == null || response.getStatus() != 200) {
                 session = "";
-                controlDisabled = true;
-                inService = false;
+                //controlDisabled = true;
+                //inService = false;
                 login();
                 initializeService();
                 response = sendGetStatusRequest();
@@ -208,7 +326,8 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                 }
             }
 
-            inService = response.inService();
+            //inService = response.inService();
+            inService = false;
 
             if (inService) {
                 logger.warn("Alarm is in service mode...");
@@ -272,6 +391,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                 logger.error("Cannot send user code due to alarm status!");
                 return;
             }
+            /*
             int timeout = 30;
             while (controlDisabled && --timeout >= 0) {
                 logger.info("Waiting for control enabling...");
@@ -284,7 +404,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             if (timeout < 0) {
                 logger.warn("Timeout during waiting for control enabling");
                 return;
-            }
+            }*/
 
             JablotronControlResponse response = sendUserCode("", serviceUrl);
             if (response == null) {
@@ -392,7 +512,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         } catch (Exception e) {
             //Silence
         } finally {
-            controlDisabled = true;
+            //controlDisabled = true;
             inService = false;
             session = "";
             if (setOffline) {

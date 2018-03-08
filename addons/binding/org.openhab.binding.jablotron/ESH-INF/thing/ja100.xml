@@ -23,6 +23,26 @@
 			<channel id="lastEventTime" typeId="lastEventTime"/>
 			<channel id="lastCheckTime" typeId="lastCheckTime"/>
 			<channel id="alarm" typeId="alarm"/>
+			<channel id="statusPGM_1" typeId="statusPGM_1"/>
+			<channel id="statusPGM_2" typeId="statusPGM_2"/>
+			<channel id="statusPGM_3" typeId="statusPGM_3"/>
+			<channel id="statusPGM_4" typeId="statusPGM_4"/>
+			<channel id="statusPGM_5" typeId="statusPGM_5"/>
+			<channel id="statusPGM_6" typeId="statusPGM_6"/>
+			<channel id="statusPGM_7" typeId="statusPGM_7"/>
+			<channel id="statusPGM_8" typeId="statusPGM_8"/>
+			<channel id="statusPGM_9" typeId="statusPGM_9"/>
+			<channel id="statusPGM_10" typeId="statusPGM_10"/>
+			<channel id="statusPGM_11" typeId="statusPGM_11"/>
+			<channel id="statusPGM_12" typeId="statusPGM_12"/>
+			<channel id="statusPGM_13" typeId="statusPGM_13"/>
+			<channel id="statusPGM_14" typeId="statusPGM_14"/>
+			<channel id="statusPGM_15" typeId="statusPGM_15"/>
+			<channel id="statusPGM_16" typeId="statusPGM_16"/>
+			<channel id="statusPGM_17" typeId="statusPGM_17"/>
+			<channel id="statusPGM_18" typeId="statusPGM_18"/>
+			<channel id="statusPGM_19" typeId="statusPGM_19"/>
+			<channel id="statusPGM_20" typeId="statusPGM_20"/>
 		</channels>
 		<config-description-ref uri="thing-type:jablotron:device"/>
 	</thing-type>

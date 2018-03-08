@@ -40,6 +40,28 @@ public class JablotronBindingConstants {
     public static final String CHANNEL_LAST_EVENT_TIME = "lastEventTime";
     public static final String CHANNEL_LAST_CHECK_TIME = "lastCheckTime";
 
+    // JA-100 channels
+    public static final String CHANNEL_STATUS_PGM_1 = "statusPGM_1";
+    public static final String CHANNEL_STATUS_PGM_2 = "statusPGM_2";
+    public static final String CHANNEL_STATUS_PGM_3 = "statusPGM_3";
+    public static final String CHANNEL_STATUS_PGM_4 = "statusPGM_4";
+    public static final String CHANNEL_STATUS_PGM_5 = "statusPGM_5";
+    public static final String CHANNEL_STATUS_PGM_6 = "statusPGM_6";
+    public static final String CHANNEL_STATUS_PGM_7 = "statusPGM_7";
+    public static final String CHANNEL_STATUS_PGM_8 = "statusPGM_8";
+    public static final String CHANNEL_STATUS_PGM_9 = "statusPGM_9";
+    public static final String CHANNEL_STATUS_PGM_10 = "statusPGM_10";
+    public static final String CHANNEL_STATUS_PGM_11 = "statusPGM_11";
+    public static final String CHANNEL_STATUS_PGM_12 = "statusPGM_12";
+    public static final String CHANNEL_STATUS_PGM_13 = "statusPGM_13";
+    public static final String CHANNEL_STATUS_PGM_14 = "statusPGM_14";
+    public static final String CHANNEL_STATUS_PGM_15 = "statusPGM_15";
+    public static final String CHANNEL_STATUS_PGM_16 = "statusPGM_16";
+    public static final String CHANNEL_STATUS_PGM_17 = "statusPGM_17";
+    public static final String CHANNEL_STATUS_PGM_18 = "statusPGM_18";
+    public static final String CHANNEL_STATUS_PGM_19 = "statusPGM_19";
+    public static final String CHANNEL_STATUS_PGM_20 = "statusPGM_20";
+
 
     // Constants
     public static final String JABLOTRON_URL = "https://www.jablonet.net/";

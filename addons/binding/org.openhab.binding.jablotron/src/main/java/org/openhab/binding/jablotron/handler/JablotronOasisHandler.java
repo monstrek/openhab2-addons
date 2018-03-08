@@ -14,7 +14,6 @@ import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.OpenClosedType;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.*;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.jablotron.config.DeviceConfig;
@@ -22,7 +21,7 @@ import org.openhab.binding.jablotron.internal.Utils;
 import org.openhab.binding.jablotron.model.JablotronControlResponse;
 import org.openhab.binding.jablotron.model.JablotronEvent;
 import org.openhab.binding.jablotron.model.JablotronLoginResponse;
-import org.openhab.binding.jablotron.model.JablotronStatusResponse;
+import org.openhab.binding.jablotron.model.OasisStatusResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +34,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static org.openhab.binding.jablotron.JablotronBindingConstants.*;
@@ -52,6 +50,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
 
     private int stavPGX = 0;
     private int stavPGY = 0;
+    private boolean controlDisabled = true;
 
     public JablotronOasisHandler(Thing thing) {
         super(thing);
@@ -92,7 +91,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         }, 1, thingConfig.getRefresh(), TimeUnit.SECONDS);
     }
 
-    private void readAlarmStatus(JablotronStatusResponse response) {
+    private void readAlarmStatus(OasisStatusResponse response) {
         logger.debug("Reading alarm status...");
         controlDisabled = response.isControlDisabled();
 
@@ -152,7 +151,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         }
     }
 
-    private synchronized JablotronStatusResponse sendGetStatusRequest() {
+    private synchronized OasisStatusResponse sendGetStatusRequest() {
 
         String url = JABLOTRON_URL + "app/oasis/ajax/stav.php?" + Utils.getBrowserTimestamp();
         try {
@@ -166,7 +165,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
             setConnectionDefaults(connection);
 
             String line = Utils.readResponse(connection);
-            return gson.fromJson(line, JablotronStatusResponse.class);
+            return gson.fromJson(line, OasisStatusResponse.class);
         } catch (SocketTimeoutException ste) {
             logger.error("Timeout during getting alarm status!");
             return null;
@@ -189,7 +188,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
             }
             lastHours = hours;
 
-            JablotronStatusResponse response = sendGetStatusRequest();
+            OasisStatusResponse response = sendGetStatusRequest();
 
             if (response == null || response.getStatus() != 200) {
                 session = "";
