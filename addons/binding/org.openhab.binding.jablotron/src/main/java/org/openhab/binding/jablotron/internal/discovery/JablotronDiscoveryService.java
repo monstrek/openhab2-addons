@@ -75,12 +75,12 @@ public class JablotronDiscoveryService extends AbstractDiscoveryService implemen
         properties.put("serviceId", serviceId);
         properties.put("url", url);
 
-        ThingUID thingUID = new ThingUID(THING_TYPE_OASIS, bridge.getThing().getUID(), serviceId);
+        ThingUID thingUID = new ThingUID(THING_TYPE_JA100, bridge.getThing().getUID(), serviceId);
 
         if (discoveryServiceCallback.getExistingThing(thingUID) == null) {
             logger.info("Detected a JA100 alarm with service id: {}", serviceId);
             thingDiscovered(
-                    DiscoveryResultBuilder.create(thingUID).withThingType(THING_TYPE_OASIS).withProperties(properties)
+                    DiscoveryResultBuilder.create(thingUID).withThingType(THING_TYPE_JA100).withProperties(properties)
                             .withRepresentationProperty("serviceId").withLabel(label)
                             .withBridge(bridge.getThing().getUID()).build());
         }
