@@ -6,12 +6,12 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.openhab.binding.jablotron.model;
+package org.openhab.binding.jablotron.model.oasis;
 
-public class JablotronLastEntry {
-    JablotronLastEntryCID cid;
+public class OasisLastEntryCID {
+    long time;
 
-    public JablotronLastEntryCID getCid() {
-        return cid;
+    public long getTime() {
+        return time;
     }
 }

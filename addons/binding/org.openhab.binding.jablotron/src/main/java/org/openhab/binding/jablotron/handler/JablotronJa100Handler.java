@@ -11,7 +11,6 @@ package org.openhab.binding.jablotron.handler;
 import com.google.gson.*;
 import org.eclipse.smarthome.core.library.types.DateTimeType;
 import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.OpenClosedType;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.*;
 import org.eclipse.smarthome.core.types.Command;
@@ -19,6 +18,9 @@ import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.jablotron.config.DeviceConfig;
 import org.openhab.binding.jablotron.internal.Utils;
 import org.openhab.binding.jablotron.model.*;
+import org.openhab.binding.jablotron.model.ja100.Ja100Event;
+import org.openhab.binding.jablotron.model.ja100.Ja100StatusResponse;
+import org.openhab.binding.jablotron.model.oasis.OasisEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -137,26 +139,26 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         logger.info("Status A: {}", stavA);
         logger.info("Status B: {}", stavB);
 
-        logger.info("Status 1", stavPGM_1);
-        logger.info("Status 2", stavPGM_2);
-        logger.info("Status 3", stavPGM_3);
-        logger.info("Status 4", stavPGM_4);
-        logger.info("Status 5", stavPGM_5);
-        logger.info("Status 6", stavPGM_6);
-        logger.info("Status 7", stavPGM_7);
-        logger.info("Status 8", stavPGM_8);
-        logger.info("Status 9", stavPGM_9);
-        logger.info("Status 10", stavPGM_10);
-        logger.info("Status 11", stavPGM_11);
-        logger.info("Status 12", stavPGM_12);
-        logger.info("Status 13", stavPGM_13);
-        logger.info("Status 14", stavPGM_14);
-        logger.info("Status 15", stavPGM_15);
-        logger.info("Status 16", stavPGM_16);
-        logger.info("Status 17", stavPGM_17);
-        logger.info("Status 18", stavPGM_18);
-        logger.info("Status 19", stavPGM_19);
-        logger.info("Status 20", stavPGM_20);
+        logger.info("Status 1: {}", stavPGM_1);
+        logger.info("Status 2: {}", stavPGM_2);
+        logger.info("Status 3: {}", stavPGM_3);
+        logger.info("Status 4: {}", stavPGM_4);
+        logger.info("Status 5: {}", stavPGM_5);
+        logger.info("Status 6: {}", stavPGM_6);
+        logger.info("Status 7: {}", stavPGM_7);
+        logger.info("Status 8: {}", stavPGM_8);
+        logger.info("Status 9: {}", stavPGM_9);
+        logger.info("Status 10: {}", stavPGM_10);
+        logger.info("Status 11: {}", stavPGM_11);
+        logger.info("Status 12: {}", stavPGM_12);
+        logger.info("Status 13: {}", stavPGM_13);
+        logger.info("Status 14: {}", stavPGM_14);
+        logger.info("Status 15: {}", stavPGM_15);
+        logger.info("Status 16: {}", stavPGM_16);
+        logger.info("Status 17: {}", stavPGM_17);
+        logger.info("Status 18: {}", stavPGM_18);
+        logger.info("Status 19: {}", stavPGM_19);
+        logger.info("Status 20: {}", stavPGM_20);
 
 
         for (Channel channel : getThing().getChannels()) {
@@ -310,17 +312,17 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                 return false;
             }
             if (response.hasEvents()) {
-                ArrayList<JablotronEvent> events = response.getEvents();
-                for (JablotronEvent event : events) {
+                ArrayList<OasisEvent> events = response.getEvents();
+                for (OasisEvent event : events) {
                     logger.debug("Found event: {} {} {}", event.getDatum(), event.getCode(), event.getEvent());
                     updateLastEvent(event);
 
                 }
             } else {
-                ArrayList<JablotronEvent> history = getServiceHistory();
+                ArrayList<OasisEvent> history = getServiceHistory();
                 logger.debug("History log contains {} events", history.size());
                 if (history.size() > 0) {
-                    JablotronEvent event = history.get(0);
+                    OasisEvent event = history.get(0);
                     updateLastEvent(event);
                     logger.debug("Last event: {} is of class: {} has code: {}", event.getEvent(), event.getEventClass(), event.getCode());
                 }
@@ -364,7 +366,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         initializeService(false);
     }
 
-    private void updateLastEvent(JablotronEvent event) {
+    private void updateLastEvent(OasisEvent event) {
         updateChannel(CHANNEL_LAST_EVENT_CODE, event.getCode());
         updateChannel(CHANNEL_LAST_EVENT, event.getEvent());
         updateChannel(CHANNEL_LAST_EVENT_CLASS, event.getEventClass());
@@ -626,7 +628,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         }
     }
 
-    private ArrayList<JablotronEvent> getServiceHistory() {
+    private ArrayList<OasisEvent> getServiceHistory() {
         String serviceId = thingConfig.getServiceId();
         try {
             URL cookieUrl = new URL("https://www.jablonet.net/app/ja100/ajax/historie.php");
@@ -647,21 +649,36 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             String line = Utils.readResponse(connection);
             logger.info("History response: {}", line);
 
-            ArrayList<JablotronEvent> result = new ArrayList<>();
+            ArrayList<OasisEvent> result = new ArrayList<>();
 
             JsonParser parser = new JsonParser();
             JsonObject jobject = parser.parse(line).getAsJsonObject();
+            if(jobject.has("ResponseCode") && jobject.get("ResponseCode").getAsInt() == 200) {
+                logger.info("History successfully retrieved with total of {} events.", jobject.get("EventsCount").getAsInt());
+                if(jobject.has("HistoryData")) {
+                    jobject = jobject.get("HistoryData").getAsJsonObject();
+                    if (jobject.has("Events")) {
+                        JsonArray jarray = jobject.get("Events").getAsJsonArray();
+                        logger.info("Parsing events...");
+                        Ja100Event[] events = gson.fromJson(jarray, Ja100Event[].class);
+                        //result.addAll(Arrays.asList(events));
+                        logger.info("Last event: {}", events[0].toString());
+                    }
+                }
+            }
+
+            /*
             if (jobject.has("events")) {
                 jobject = jobject.get("events").getAsJsonObject();
 
                 for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
                     String key = entry.getKey();
                     if (jobject.get(key) instanceof JsonArray) {
-                        JablotronEvent[] events = gson.fromJson(jobject.get(key), JablotronEvent[].class);
+                        OasisEvent[] events = gson.fromJson(jobject.get(key), OasisEvent[].class);
                         result.addAll(Arrays.asList(events));
                     }
                 }
-            }
+            }*/
             return result;
         } catch (Exception ex) {
             logger.error("Cannot get Jablotron service history: {}", serviceId, ex);

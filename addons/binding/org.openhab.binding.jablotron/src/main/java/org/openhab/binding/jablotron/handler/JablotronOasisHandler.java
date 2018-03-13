@@ -19,9 +19,9 @@ import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.jablotron.config.DeviceConfig;
 import org.openhab.binding.jablotron.internal.Utils;
 import org.openhab.binding.jablotron.model.JablotronControlResponse;
-import org.openhab.binding.jablotron.model.JablotronEvent;
+import org.openhab.binding.jablotron.model.oasis.OasisEvent;
 import org.openhab.binding.jablotron.model.JablotronLoginResponse;
-import org.openhab.binding.jablotron.model.OasisStatusResponse;
+import org.openhab.binding.jablotron.model.oasis.OasisStatusResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -204,17 +204,17 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
                 return false;
             }
             if (response.hasEvents()) {
-                ArrayList<JablotronEvent> events = response.getEvents();
-                for (JablotronEvent event : events) {
+                ArrayList<OasisEvent> events = response.getEvents();
+                for (OasisEvent event : events) {
                     logger.debug("Found event: {} {} {}", event.getDatum(), event.getCode(), event.getEvent());
                     updateLastEvent(event);
 
                 }
             } else {
-                ArrayList<JablotronEvent> history = getServiceHistory();
+                ArrayList<OasisEvent> history = getServiceHistory();
                 logger.debug("History log contains {} events", history.size());
                 if (history.size() > 0) {
-                    JablotronEvent event = history.get(0);
+                    OasisEvent event = history.get(0);
                     updateLastEvent(event);
                     logger.debug("Last event: {} is of class: {} has code: {}", event.getEvent(), event.getEventClass(), event.getCode());
                 }
@@ -257,7 +257,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         initializeService(false);
     }
 
-    private void updateLastEvent(JablotronEvent event) {
+    private void updateLastEvent(OasisEvent event) {
         updateChannel(CHANNEL_LAST_EVENT_CODE, event.getCode());
         updateChannel(CHANNEL_LAST_EVENT, event.getEvent());
         updateChannel(CHANNEL_LAST_EVENT_CLASS, event.getEventClass());
@@ -518,7 +518,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         }
     }
 
-    private ArrayList<JablotronEvent> getServiceHistory() {
+    private ArrayList<OasisEvent> getServiceHistory() {
         String serviceId = thingConfig.getServiceId();
         try {
             URL cookieUrl = new URL("https://www.jablonet.net/app/oasis/ajax/historie.php");
@@ -539,7 +539,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
             String line = Utils.readResponse(connection);
             logger.debug("History: {}", line);
 
-            ArrayList<JablotronEvent> result = new ArrayList<>();
+            ArrayList<OasisEvent> result = new ArrayList<>();
 
             JsonParser parser = new JsonParser();
             JsonObject jobject = parser.parse(line).getAsJsonObject();
@@ -549,7 +549,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
                 for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
                     String key = entry.getKey();
                     if (jobject.get(key) instanceof JsonArray) {
-                        JablotronEvent[] events = gson.fromJson(jobject.get(key), JablotronEvent[].class);
+                        OasisEvent[] events = gson.fromJson(jobject.get(key), OasisEvent[].class);
                         result.addAll(Arrays.asList(events));
                     }
                 }

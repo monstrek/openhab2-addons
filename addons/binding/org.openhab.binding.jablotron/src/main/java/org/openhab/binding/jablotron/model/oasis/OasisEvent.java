@@ -6,11 +6,11 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.openhab.binding.jablotron.model;
+package org.openhab.binding.jablotron.model.oasis;
 
 import com.google.gson.annotations.SerializedName;
 
-public class JablotronEvent {
+public class OasisEvent {
     private String datum;
     private long time;
     private String code;
