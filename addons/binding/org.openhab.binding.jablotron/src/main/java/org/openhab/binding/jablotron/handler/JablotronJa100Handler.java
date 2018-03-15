@@ -10,6 +10,7 @@ package org.openhab.binding.jablotron.handler;
 
 import com.google.gson.*;
 import org.eclipse.smarthome.core.library.types.DateTimeType;
+import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.*;
@@ -32,6 +33,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -50,6 +52,22 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
     public JablotronJa100Handler(Thing thing) {
         super(thing);
     }
+
+    private int stav_1 = 0;
+    private int stav_2 = 0;
+    private int stav_3 = 0;
+    private int stav_4 = 0;
+    private int stav_5 = 0;
+    private int stav_6 = 0;
+    private int stav_7 = 0;
+    private int stav_8 = 0;
+    private int stav_9 = 0;
+    private int stav_10 = 0;
+    private int stav_11 = 0;
+    private int stav_12 = 0;
+    private int stav_13 = 0;
+    private int stav_14 = 0;
+    private int stav_15 = 0;
 
     private int stavPGM_1 = 0;
     private int stavPGM_2 = 0;
@@ -110,34 +128,58 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
     private void readAlarmStatus(Ja100StatusResponse response) {
         logger.debug("Reading alarm status...");
 
-        stavA = response.getSekceStatus(0);
-        stavB = response.getSekceStatus(1);
+        stav_1 = response.getSekceStatus(0);
+        stav_2 = response.getSekceStatus(1);
+        stav_3 = response.getSekceStatus(2);
+        stav_4 = response.getSekceStatus(3);
+        stav_5 = response.getSekceStatus(4);
+        stav_6 = response.getSekceStatus(5);
+        stav_7 = response.getSekceStatus(6);
+        stav_8 = response.getSekceStatus(7);
+        stav_9 = response.getSekceStatus(8);
+        stav_10 = response.getSekceStatus(9);
+        stav_11 = response.getSekceStatus(10);
+        stav_12 = response.getSekceStatus(11);
+        stav_13 = response.getSekceStatus(12);
+        stav_14 = response.getSekceStatus(13);
+        stav_15 = response.getSekceStatus(14);
 
-        stavPGM_20 = response.getPgmStatus(0);
-        stavPGM_19 = response.getPgmStatus(1);
-        stavPGM_18 = response.getPgmStatus(2);
-        stavPGM_17 = response.getPgmStatus(3);
-        stavPGM_16 = response.getPgmStatus(4);
-        stavPGM_15 = response.getPgmStatus(5);
-        stavPGM_14 = response.getPgmStatus(6);
-        stavPGM_13 = response.getPgmStatus(7);
-        stavPGM_12 = response.getPgmStatus(8);
-        stavPGM_11 = response.getPgmStatus(9);
-        stavPGM_10 = response.getPgmStatus(10);
-        stavPGM_9 = response.getPgmStatus(11);
-        stavPGM_8 = response.getPgmStatus(12);
-        stavPGM_7 = response.getPgmStatus(13);
-        stavPGM_6 = response.getPgmStatus(14);
-        stavPGM_5 = response.getPgmStatus(15);
-        stavPGM_4 = response.getPgmStatus(16);
-        stavPGM_3 = response.getPgmStatus(17);
-        stavPGM_2 = response.getPgmStatus(18);
-        stavPGM_1 = response.getPgmStatus(19);
+        stavPGM_1 = response.getPgmStatus(0);
+        stavPGM_2 = response.getPgmStatus(1);
+        stavPGM_3 = response.getPgmStatus(2);
+        stavPGM_4 = response.getPgmStatus(3);
+        stavPGM_5 = response.getPgmStatus(4);
+        stavPGM_6 = response.getPgmStatus(5);
+        stavPGM_7 = response.getPgmStatus(6);
+        stavPGM_8 = response.getPgmStatus(7);
+        stavPGM_9 = response.getPgmStatus(8);
+        stavPGM_10 = response.getPgmStatus(9);
+        stavPGM_11 = response.getPgmStatus(10);
+        stavPGM_12 = response.getPgmStatus(11);
+        stavPGM_13 = response.getPgmStatus(12);
+        stavPGM_14 = response.getPgmStatus(13);
+        stavPGM_15 = response.getPgmStatus(14);
+        stavPGM_16 = response.getPgmStatus(15);
+        stavPGM_17 = response.getPgmStatus(16);
+        stavPGM_18 = response.getPgmStatus(17);
+        stavPGM_19 = response.getPgmStatus(18);
+        stavPGM_20 = response.getPgmStatus(19);
 
-
-
-        logger.info("Status A: {}", stavA);
-        logger.info("Status B: {}", stavB);
+        logger.info("Status 1: {}", stav_1);
+        logger.info("Status 2: {}", stav_2);
+        logger.info("Status 3: {}", stav_3);
+        logger.info("Status 4: {}", stav_4);
+        logger.info("Status 5: {}", stav_5);
+        logger.info("Status 6: {}", stav_6);
+        logger.info("Status 7: {}", stav_7);
+        logger.info("Status 8: {}", stav_8);
+        logger.info("Status 9: {}", stav_9);
+        logger.info("Status 10: {}", stav_10);
+        logger.info("Status 11: {}", stav_11);
+        logger.info("Status 12: {}", stav_12);
+        logger.info("Status 13: {}", stav_13);
+        logger.info("Status 14: {}", stav_14);
+        logger.info("Status 15: {}", stav_15);
 
         logger.info("Status 1: {}", stavPGM_1);
         logger.info("Status 2: {}", stavPGM_2);
@@ -166,11 +208,50 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             String type = channel.getUID().getId();
 
             switch (type) {
-                case CHANNEL_STATUS_A:
-                    newState = (stavA == 1) ? OnOffType.ON : OnOffType.OFF;
+                case CHANNEL_STATUS_1:
+                    newState = new DecimalType(stav_1);
                     break;
-                case CHANNEL_STATUS_B:
-                    newState = (stavB == 1) ? OnOffType.ON : OnOffType.OFF;
+                case CHANNEL_STATUS_2:
+                    newState = new DecimalType(stav_2);
+                    break;
+                case CHANNEL_STATUS_3:
+                    newState = new DecimalType(stav_3);
+                    break;
+                case CHANNEL_STATUS_4:
+                    newState = new DecimalType(stav_4);
+                    break;
+                case CHANNEL_STATUS_5:
+                    newState = new DecimalType(stav_5);
+                    break;
+                case CHANNEL_STATUS_6:
+                    newState = new DecimalType(stav_6);
+                    break;
+                case CHANNEL_STATUS_7:
+                    newState = new DecimalType(stav_7);
+                    break;
+                case CHANNEL_STATUS_8:
+                    newState = new DecimalType(stav_8);
+                    break;
+                case CHANNEL_STATUS_9:
+                    newState = new DecimalType(stav_9);
+                    break;
+                case CHANNEL_STATUS_10:
+                    newState = new DecimalType(stav_10);
+                    break;
+                case CHANNEL_STATUS_11:
+                    newState = new DecimalType(stav_11);
+                    break;
+                case CHANNEL_STATUS_12:
+                    newState = new DecimalType(stav_12);
+                    break;
+                case CHANNEL_STATUS_13:
+                    newState = new DecimalType(stav_13);
+                    break;
+                case CHANNEL_STATUS_14:
+                    newState = new DecimalType(stav_14);
+                    break;
+                case CHANNEL_STATUS_15:
+                    newState = new DecimalType(stav_15);
                     break;
                 case CHANNEL_STATUS_PGM_1:
                     newState = (stavPGM_1 == 1) ? OnOffType.ON : OnOffType.OFF;
@@ -315,16 +396,16 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                 ArrayList<OasisEvent> events = response.getEvents();
                 for (OasisEvent event : events) {
                     logger.debug("Found event: {} {} {}", event.getDatum(), event.getCode(), event.getEvent());
-                    updateLastEvent(event);
+                    //updateLastEvent(event);
 
                 }
             } else {
-                ArrayList<OasisEvent> history = getServiceHistory();
+                ArrayList<Ja100Event> history = getServiceHistory();
                 logger.debug("History log contains {} events", history.size());
                 if (history.size() > 0) {
-                    OasisEvent event = history.get(0);
+                    Ja100Event event = history.get(0);
                     updateLastEvent(event);
-                    logger.debug("Last event: {} is of class: {} has code: {}", event.getEvent(), event.getEventClass(), event.getCode());
+                    logger.debug("Last event: {} is of class: {} has section: {}", event.getEvent(), event.getEventClass(), event.getSection());
                 }
             }
 
@@ -366,8 +447,12 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         initializeService(false);
     }
 
-    private void updateLastEvent(OasisEvent event) {
-        updateChannel(CHANNEL_LAST_EVENT_CODE, event.getCode());
+    private void updateLastEvent(Ja100Event event) {
+        //ZonedDateTime time = ZonedDateTime.parse("2018-03-15T18:07:32+01:00", DateTimeFormatter.ISO_DATE_TIME);
+        //ZonedDateTime time = ZonedDateTime.parse(event.getDate(), DateTimeFormatter.ISO_DATE_TIME);
+        //DateTimeType typ = new DateTimeType(time);
+        updateChannel(CHANNEL_LAST_EVENT_TIME, event.getZonedDateTime());
+        updateChannel(CHANNEL_LAST_EVENT_SECTION, event.getSection());
         updateChannel(CHANNEL_LAST_EVENT, event.getEvent());
         updateChannel(CHANNEL_LAST_EVENT_CLASS, event.getEventClass());
     }
@@ -376,6 +461,14 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         for (Channel channel : getThing().getChannels()) {
             if (channel.getUID().getId().equals(channelName)) {
                 updateState(channel.getUID(), new StringType(text));
+            }
+        }
+    }
+
+    private void updateChannel(String channelName, ZonedDateTime date) {
+        for (Channel channel : getThing().getChannels()) {
+            if (channel.getUID().getId().equals(channelName)) {
+                updateState(channel.getUID(), new DateTimeType(date));
             }
         }
     }
@@ -542,9 +635,21 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
 
         try {
             //login
-            stavA = 0;
-            stavB = 0;
-            stavABC = 0;
+            stav_1 = 0;
+            stav_2 = 0;
+            stav_3 = 0;
+            stav_4 = 0;
+            stav_5 = 0;
+            stav_6 = 0;
+            stav_7 = 0;
+            stav_8 = 0;
+            stav_9 = 0;
+            stav_10 = 0;
+            stav_11 = 0;
+            stav_12 = 0;
+            stav_13 = 0;
+            stav_14 = 0;
+            stav_15 = 0;
 
             JablotronBridgeHandler bridge = (JablotronBridgeHandler) this.getBridge().getHandler();
             if (bridge == null) {
@@ -628,7 +733,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         }
     }
 
-    private ArrayList<OasisEvent> getServiceHistory() {
+    private ArrayList<Ja100Event> getServiceHistory() {
         String serviceId = thingConfig.getServiceId();
         try {
             URL cookieUrl = new URL("https://www.jablonet.net/app/ja100/ajax/historie.php");
@@ -649,7 +754,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             String line = Utils.readResponse(connection);
             logger.info("History response: {}", line);
 
-            ArrayList<OasisEvent> result = new ArrayList<>();
+            ArrayList<Ja100Event> result = new ArrayList<>();
 
             JsonParser parser = new JsonParser();
             JsonObject jobject = parser.parse(line).getAsJsonObject();
@@ -661,7 +766,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                         JsonArray jarray = jobject.get("Events").getAsJsonArray();
                         logger.info("Parsing events...");
                         Ja100Event[] events = gson.fromJson(jarray, Ja100Event[].class);
-                        //result.addAll(Arrays.asList(events));
+                        result.addAll(Arrays.asList(events));
                         logger.info("Last event: {}", events[0].toString());
                     }
                 }

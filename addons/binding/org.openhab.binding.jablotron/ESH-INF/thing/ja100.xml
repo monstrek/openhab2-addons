@@ -13,15 +13,27 @@
 		<description>A Jablotron JA100 alarm device.</description>
 
 		<channels>
-			<channel id="statusA" typeId="statusA"/>
-			<channel id="statusB" typeId="statusB"/>
-			<channel id="statusABC" typeId="statusABC"/>
+			<channel id="status_1" typeId="status_1"/>
+			<channel id="status_2" typeId="status_2"/>
+			<channel id="status_3" typeId="status_3"/>
+			<channel id="status_4" typeId="status_4"/>
+			<channel id="status_5" typeId="status_5"/>
+			<channel id="status_6" typeId="status_6"/>
+			<channel id="status_7" typeId="status_7"/>
+			<channel id="status_8" typeId="status_8"/>
+			<channel id="status_9" typeId="status_9"/>
+			<channel id="status_10" typeId="status_10"/>
+			<channel id="status_11" typeId="status_11"/>
+			<channel id="status_12" typeId="status_12"/>
+			<channel id="status_13" typeId="status_13"/>
+			<channel id="status_14" typeId="status_14"/>
+			<channel id="status_15" typeId="status_15"/>
 			<channel id="command" typeId="command"/>
 			<channel id="lastEvent" typeId="lastEvent"/>
-			<channel id="lastEventCode" typeId="lastEventCode"/>
 			<channel id="lastEventClass" typeId="lastEventClass"/>
 			<channel id="lastEventTime" typeId="lastEventTime"/>
 			<channel id="lastCheckTime" typeId="lastCheckTime"/>
+			<channel id="lastEventSection" typeId="lastEventSection"/>
 			<channel id="alarm" typeId="alarm"/>
 			<channel id="statusPGM_1" typeId="statusPGM_1"/>
 			<channel id="statusPGM_2" typeId="statusPGM_2"/>

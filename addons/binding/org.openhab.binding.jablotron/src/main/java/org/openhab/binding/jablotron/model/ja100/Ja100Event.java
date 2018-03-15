@@ -10,6 +10,10 @@ package org.openhab.binding.jablotron.model.ja100;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+
 public class Ja100Event {
     private String date;
 
@@ -24,6 +28,10 @@ public class Ja100Event {
 
     public String getDate() {
         return date;
+    }
+
+    public ZonedDateTime getZonedDateTime() {
+        return ZonedDateTime.parse(date.substring(0,22) + ":" + date.substring(22,24), DateTimeFormatter.ISO_DATE_TIME);
     }
 
     public String getEvent() {
@@ -41,7 +49,7 @@ public class Ja100Event {
     @Override
     public String toString() {
         return "Ja100Event{" +
-                "date='" + date + '\'' +
+                "date=" + date +
                 ", section='" + section + '\'' +
                 ", event='" + event + '\'' +
                 ", eventClass='" + eventClass + '\'' +

@@ -132,47 +132,34 @@ public class Ja100StatusResponse {
 
     }
 
-    public int getSekceStatus(int position) {
-        int i = 0;
+    public int getSekceStatus(int sekceId) {
         JsonObject jobject = sekce.getAsJsonObject();
 
-        if (jobject.entrySet().size() <= position) {
-            return 0;
-        }
-
         for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
-            if (i == position) {
-                String key = entry.getKey();
+            String key = entry.getKey();
+            if(key.equals(String.valueOf(sekceId))) {
                 if (jobject.get(key) instanceof JsonObject) {
                     //each day
                     JsonObject event = jobject.get(key).getAsJsonObject();
                     return event.get("stav").getAsInt();
                 }
             }
-            i++;
         }
         return 0;
     }
 
-    public int getPgmStatus(int position) {
-
-        int i = 0;
+    public int getPgmStatus(int pgmId) {
         JsonObject jobject = pgm.getAsJsonObject();
 
-        if (jobject.entrySet().size() <= i) {
-            return 0;
-        }
-
         for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
-            if (i == position) {
-                String key = entry.getKey();
+            String key = entry.getKey();
+            if(key.equals(String.valueOf(pgmId))) {
                 if (jobject.get(key) instanceof JsonObject) {
                     //each day
                     JsonObject event = jobject.get(key).getAsJsonObject();
                     return event.get("stav").getAsInt();
                 }
             }
-            i++;
         }
         return 0;
 

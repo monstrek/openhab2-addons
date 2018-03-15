@@ -25,22 +25,41 @@ public class JablotronBindingConstants {
     public static final ThingTypeUID THING_TYPE_OASIS = new ThingTypeUID(BINDING_ID, "oasis");
     public static final ThingTypeUID THING_TYPE_JA100 = new ThingTypeUID(BINDING_ID, "ja100");
 
+    // Common channels
+    public static final String CHANNEL_COMMAND = "command";
+    public static final String CHANNEL_ALARM = "alarm";
+    public static final String CHANNEL_LAST_EVENT = "lastEvent";
+    public static final String CHANNEL_LAST_EVENT_CLASS = "lastEventClass";
+    public static final String CHANNEL_LAST_EVENT_TIME = "lastEventTime";
+    public static final String CHANNEL_LAST_CHECK_TIME = "lastCheckTime";
 
     // List of all OASIS Channel ids
+    public static final String CHANNEL_LAST_EVENT_CODE = "lastEventCode";
     public static final String CHANNEL_STATUS_A = "statusA";
     public static final String CHANNEL_STATUS_B = "statusB";
     public static final String CHANNEL_STATUS_ABC = "statusABC";
     public static final String CHANNEL_STATUS_PGX = "statusPGX";
     public static final String CHANNEL_STATUS_PGY = "statusPGY";
-    public static final String CHANNEL_COMMAND = "command";
-    public static final String CHANNEL_ALARM = "alarm";
-    public static final String CHANNEL_LAST_EVENT = "lastEvent";
-    public static final String CHANNEL_LAST_EVENT_CODE = "lastEventCode";
-    public static final String CHANNEL_LAST_EVENT_CLASS = "lastEventClass";
-    public static final String CHANNEL_LAST_EVENT_TIME = "lastEventTime";
-    public static final String CHANNEL_LAST_CHECK_TIME = "lastCheckTime";
 
     // JA-100 channels
+    public static final String CHANNEL_LAST_EVENT_SECTION = "lastEventSection";
+    public static final String CHANNEL_STATUS_1 = "status_1";
+    public static final String CHANNEL_STATUS_2 = "status_2";
+    public static final String CHANNEL_STATUS_3 = "status_3";
+    public static final String CHANNEL_STATUS_4 = "status_4";
+    public static final String CHANNEL_STATUS_5 = "status_5";
+    public static final String CHANNEL_STATUS_6 = "status_6";
+    public static final String CHANNEL_STATUS_7 = "status_7";
+    public static final String CHANNEL_STATUS_8 = "status_8";
+    public static final String CHANNEL_STATUS_9 = "status_9";
+    public static final String CHANNEL_STATUS_10 = "status_10";
+    public static final String CHANNEL_STATUS_11 = "status_11";
+    public static final String CHANNEL_STATUS_12 = "status_12";
+    public static final String CHANNEL_STATUS_13 = "status_13";
+    public static final String CHANNEL_STATUS_14 = "status_14";
+    public static final String CHANNEL_STATUS_15 = "status_15";
+
+
     public static final String CHANNEL_STATUS_PGM_1 = "statusPGM_1";
     public static final String CHANNEL_STATUS_PGM_2 = "statusPGM_2";
     public static final String CHANNEL_STATUS_PGM_3 = "statusPGM_3";

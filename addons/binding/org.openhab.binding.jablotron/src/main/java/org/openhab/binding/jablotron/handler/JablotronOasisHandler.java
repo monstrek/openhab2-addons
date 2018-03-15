@@ -48,6 +48,9 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
 
     private final Logger logger = LoggerFactory.getLogger(JablotronOasisHandler.class);
 
+    private int stavA = 0;
+    private int stavB = 0;
+    private int stavABC = 0;
     private int stavPGX = 0;
     private int stavPGY = 0;
     private boolean controlDisabled = true;
