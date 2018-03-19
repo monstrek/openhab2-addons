@@ -181,31 +181,34 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         logger.info("Status 14: {}", stav_14);
         logger.info("Status 15: {}", stav_15);
 
-        logger.info("Status 1: {}", stavPGM_1);
-        logger.info("Status 2: {}", stavPGM_2);
-        logger.info("Status 3: {}", stavPGM_3);
-        logger.info("Status 4: {}", stavPGM_4);
-        logger.info("Status 5: {}", stavPGM_5);
-        logger.info("Status 6: {}", stavPGM_6);
-        logger.info("Status 7: {}", stavPGM_7);
-        logger.info("Status 8: {}", stavPGM_8);
-        logger.info("Status 9: {}", stavPGM_9);
-        logger.info("Status 10: {}", stavPGM_10);
-        logger.info("Status 11: {}", stavPGM_11);
-        logger.info("Status 12: {}", stavPGM_12);
-        logger.info("Status 13: {}", stavPGM_13);
-        logger.info("Status 14: {}", stavPGM_14);
-        logger.info("Status 15: {}", stavPGM_15);
-        logger.info("Status 16: {}", stavPGM_16);
-        logger.info("Status 17: {}", stavPGM_17);
-        logger.info("Status 18: {}", stavPGM_18);
-        logger.info("Status 19: {}", stavPGM_19);
-        logger.info("Status 20: {}", stavPGM_20);
+        logger.info("Status PGM 1: {}", stavPGM_1);
+        logger.info("Status PGM 2: {}", stavPGM_2);
+        logger.info("Status PGM 3: {}", stavPGM_3);
+        logger.info("Status PGM 4: {}", stavPGM_4);
+        logger.info("Status PGM 5: {}", stavPGM_5);
+        logger.info("Status PGM 6: {}", stavPGM_6);
+        logger.info("Status PGM 7: {}", stavPGM_7);
+        logger.info("Status PGM 8: {}", stavPGM_8);
+        logger.info("Status PGM 9: {}", stavPGM_9);
+        logger.info("Status PGM 10: {}", stavPGM_10);
+        logger.info("Status PGM 11: {}", stavPGM_11);
+        logger.info("Status PGM 12: {}", stavPGM_12);
+        logger.info("Status PGM 13: {}", stavPGM_13);
+        logger.info("Status PGM 14: {}", stavPGM_14);
+        logger.info("Status PGM 15: {}", stavPGM_15);
+        logger.info("Status PGM 16: {}", stavPGM_16);
+        logger.info("Status PGM 17: {}", stavPGM_17);
+        logger.info("Status PGM 18: {}", stavPGM_18);
+        logger.info("Status PGM 19: {}", stavPGM_19);
+        logger.info("Status PGM 20: {}", stavPGM_20);
 
 
+        logger.info("About to update thing's channel statuses...");
         for (Channel channel : getThing().getChannels()) {
             State newState = null;
             String type = channel.getUID().getId();
+
+            logger.info("Updating status of channel {}", type);
 
             switch (type) {
                 case CHANNEL_STATUS_1:
