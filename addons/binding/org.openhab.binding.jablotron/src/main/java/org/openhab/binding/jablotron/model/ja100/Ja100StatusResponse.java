@@ -28,9 +28,9 @@ public class Ja100StatusResponse {
     int status;
     JsonElement sekce;
     JsonElement pgm;
+    JsonElement alarm;
     //boolean controlDisabled;
     //int service;
-    //int isAlarm;
     //JsonElement vypis;
 
     /*
@@ -70,15 +70,16 @@ public class Ja100StatusResponse {
         return status == 800;
     }
 
-    /*
+
     public boolean inService() {
-        return service == 1;
+        //return service == 1;
+        return false;
     }
 
     public boolean isAlarm() {
-        return isAlarm == 1;
+        JsonArray alarmArray = alarm.getAsJsonArray();
+        return alarmArray.size() > 0;
     }
-    */
 
     public boolean hasEvents() {
         //return vypis != null && !vypis.equals(JsonNull.INSTANCE);

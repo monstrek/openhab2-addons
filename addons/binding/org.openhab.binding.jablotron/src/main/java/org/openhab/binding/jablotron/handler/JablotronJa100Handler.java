@@ -9,10 +9,7 @@
 package org.openhab.binding.jablotron.handler;
 
 import com.google.gson.*;
-import org.eclipse.smarthome.core.library.types.DateTimeType;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.StringType;
+import org.eclipse.smarthome.core.library.types.*;
 import org.eclipse.smarthome.core.thing.*;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
@@ -165,50 +162,48 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         stavPGM_19 = response.getPgmStatus(18);
         stavPGM_20 = response.getPgmStatus(19);
 
-        logger.info("Status 1: {}", stav_1);
-        logger.info("Status 2: {}", stav_2);
-        logger.info("Status 3: {}", stav_3);
-        logger.info("Status 4: {}", stav_4);
-        logger.info("Status 5: {}", stav_5);
-        logger.info("Status 6: {}", stav_6);
-        logger.info("Status 7: {}", stav_7);
-        logger.info("Status 8: {}", stav_8);
-        logger.info("Status 9: {}", stav_9);
-        logger.info("Status 10: {}", stav_10);
-        logger.info("Status 11: {}", stav_11);
-        logger.info("Status 12: {}", stav_12);
-        logger.info("Status 13: {}", stav_13);
-        logger.info("Status 14: {}", stav_14);
-        logger.info("Status 15: {}", stav_15);
+        logger.debug("Status 1: {}", stav_1);
+        logger.debug("Status 2: {}", stav_2);
+        logger.debug("Status 3: {}", stav_3);
+        logger.debug("Status 4: {}", stav_4);
+        logger.debug("Status 5: {}", stav_5);
+        logger.debug("Status 6: {}", stav_6);
+        logger.debug("Status 7: {}", stav_7);
+        logger.debug("Status 8: {}", stav_8);
+        logger.debug("Status 9: {}", stav_9);
+        logger.debug("Status 10: {}", stav_10);
+        logger.debug("Status 11: {}", stav_11);
+        logger.debug("Status 12: {}", stav_12);
+        logger.debug("Status 13: {}", stav_13);
+        logger.debug("Status 14: {}", stav_14);
+        logger.debug("Status 15: {}", stav_15);
 
-        logger.info("Status PGM 1: {}", stavPGM_1);
-        logger.info("Status PGM 2: {}", stavPGM_2);
-        logger.info("Status PGM 3: {}", stavPGM_3);
-        logger.info("Status PGM 4: {}", stavPGM_4);
-        logger.info("Status PGM 5: {}", stavPGM_5);
-        logger.info("Status PGM 6: {}", stavPGM_6);
-        logger.info("Status PGM 7: {}", stavPGM_7);
-        logger.info("Status PGM 8: {}", stavPGM_8);
-        logger.info("Status PGM 9: {}", stavPGM_9);
-        logger.info("Status PGM 10: {}", stavPGM_10);
-        logger.info("Status PGM 11: {}", stavPGM_11);
-        logger.info("Status PGM 12: {}", stavPGM_12);
-        logger.info("Status PGM 13: {}", stavPGM_13);
-        logger.info("Status PGM 14: {}", stavPGM_14);
-        logger.info("Status PGM 15: {}", stavPGM_15);
-        logger.info("Status PGM 16: {}", stavPGM_16);
-        logger.info("Status PGM 17: {}", stavPGM_17);
-        logger.info("Status PGM 18: {}", stavPGM_18);
-        logger.info("Status PGM 19: {}", stavPGM_19);
-        logger.info("Status PGM 20: {}", stavPGM_20);
+        logger.debug("Status PGM 1: {}", stavPGM_1);
+        logger.debug("Status PGM 2: {}", stavPGM_2);
+        logger.debug("Status PGM 3: {}", stavPGM_3);
+        logger.debug("Status PGM 4: {}", stavPGM_4);
+        logger.debug("Status PGM 5: {}", stavPGM_5);
+        logger.debug("Status PGM 6: {}", stavPGM_6);
+        logger.debug("Status PGM 7: {}", stavPGM_7);
+        logger.debug("Status PGM 8: {}", stavPGM_8);
+        logger.debug("Status PGM 9: {}", stavPGM_9);
+        logger.debug("Status PGM 10: {}", stavPGM_10);
+        logger.debug("Status PGM 11: {}", stavPGM_11);
+        logger.debug("Status PGM 12: {}", stavPGM_12);
+        logger.debug("Status PGM 13: {}", stavPGM_13);
+        logger.debug("Status PGM 14: {}", stavPGM_14);
+        logger.debug("Status PGM 15: {}", stavPGM_15);
+        logger.debug("Status PGM 16: {}", stavPGM_16);
+        logger.debug("Status PGM 17: {}", stavPGM_17);
+        logger.debug("Status PGM 18: {}", stavPGM_18);
+        logger.debug("Status PGM 19: {}", stavPGM_19);
+        logger.debug("Status PGM 20: {}", stavPGM_20);
 
-
-        logger.info("About to update thing's channel statuses...");
         for (Channel channel : getThing().getChannels()) {
             State newState = null;
             String type = channel.getUID().getId();
 
-            logger.info("Updating status of channel {}", type);
+            logger.trace("Updating status of channel {}", type);
 
             switch (type) {
                 case CHANNEL_STATUS_1:
@@ -316,21 +311,9 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                 case CHANNEL_STATUS_PGM_20:
                     newState = (stavPGM_20 == 1) ? OnOffType.ON : OnOffType.OFF;
                     break;
-                /*
                 case CHANNEL_ALARM:
                     newState = (response.isAlarm()) ? OpenClosedType.OPEN : OpenClosedType.CLOSED;
                     break;
-
-                case CHANNEL_LAST_EVENT_TIME:
-                    Date lastEvent = response.getLastEventTime();
-                    if (lastEvent != null) {
-                        Calendar cal = Calendar.getInstance();
-                        cal.setTime(lastEvent);
-                        ZonedDateTime zdt = ZonedDateTime.ofInstant(cal.toInstant(), ZoneId.systemDefault());
-                        newState = new DateTimeType(zdt);
-                    }
-                    break;
-                    */
                 default:
                     break;
             }
@@ -412,8 +395,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                 }
             }
 
-            //inService = response.inService();
-            inService = false;
+            inService = response.inService();
 
             if (inService) {
                 logger.warn("Alarm is in service mode...");
