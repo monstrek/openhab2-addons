@@ -33,7 +33,6 @@
         <item-type>Switch</item-type>
         <label>OASIS PGX Status Channel</label>
         <description>Status of the PGX switch of your OASIS alarm</description>
-        <state readOnly="true"/>
     </channel-type>
 
     <!-- StatusPGY -->
@@ -41,7 +40,6 @@
         <item-type>Switch</item-type>
         <label>OASIS PGY Status Channel</label>
         <description>Status of the PGY switch of your OASIS alarm</description>
-        <state readOnly="true"/>
     </channel-type>
 
     <!-- JA100 -->

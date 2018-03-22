@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2017 by the respective copyright holders.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,10 @@
  */
 package org.openhab.binding.jablotron.handler;
 
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.eclipse.smarthome.core.library.types.DateTimeType;
 import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.OpenClosedType;
@@ -19,8 +22,8 @@ import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.jablotron.config.DeviceConfig;
 import org.openhab.binding.jablotron.internal.Utils;
 import org.openhab.binding.jablotron.model.JablotronControlResponse;
-import org.openhab.binding.jablotron.model.oasis.OasisEvent;
 import org.openhab.binding.jablotron.model.JablotronLoginResponse;
+import org.openhab.binding.jablotron.model.oasis.OasisEvent;
 import org.openhab.binding.jablotron.model.oasis.OasisStatusResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +67,18 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         if (channelUID.getId().equals(CHANNEL_COMMAND) && command instanceof StringType) {
             scheduler.schedule(() -> {
                 sendCommand(command.toString(), thingConfig.getUrl());
+            }, 0, TimeUnit.SECONDS);
+        }
+
+        if (channelUID.getId().equals(CHANNEL_STATUS_PGX) && command instanceof OnOffType) {
+            scheduler.schedule(() -> {
+                controlSection("PGX", command.equals(OnOffType.ON) ? "1" : "0", thingConfig.getUrl());
+            }, 0, TimeUnit.SECONDS);
+        }
+
+        if (channelUID.getId().equals(CHANNEL_STATUS_PGY) && command instanceof OnOffType) {
+            scheduler.schedule(() -> {
+                controlSection("PGY", command.equals(OnOffType.ON) ? "1" : "0", thingConfig.getUrl());
             }, 0, TimeUnit.SECONDS);
         }
     }
@@ -274,6 +289,45 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         }
     }
 
+    public synchronized void controlSection(String section, String status, String serviceUrl) {
+        try {
+            if (!getThing().getStatus().equals(ThingStatus.ONLINE)) {
+                login();
+                initializeService();
+            }
+            if (!updateAlarmStatus()) {
+                logger.error("Cannot control section due to alarm status!");
+                return;
+            }
+            int timeout = 30;
+            while (controlDisabled && --timeout >= 0) {
+                logger.info("Waiting for control enabling...");
+                Thread.sleep(1000);
+                boolean ok = updateAlarmStatus();
+                if (!ok) {
+                    return;
+                }
+            }
+            if (timeout < 0) {
+                logger.warn("Timeout during waiting for control enabling");
+                return;
+            }
+
+
+            logger.debug("Controlling section: {} with status: {}", section, status);
+            JablotronControlResponse response = sendUserCode(section, status, "", serviceUrl);
+
+            if (response != null && response.getVysledek() != null) {
+                handleHttpRequestStatus(response.getStatus());
+            } else {
+                logger.warn("null response/status received");
+                logout();
+            }
+
+        } catch (Exception e) {
+            logger.error("internalReceiveCommand exception", e);
+        }
+    }
 
     public synchronized void sendCommand(String code, String serviceUrl) {
         int status = 0;
@@ -356,11 +410,15 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
     }
 
     private synchronized JablotronControlResponse sendUserCode(String code, String serviceUrl) {
+        return sendUserCode("STATE", code.isEmpty() ? "1" : "", code, serviceUrl);
+    }
+
+    private synchronized JablotronControlResponse sendUserCode(String section, String status, String code, String serviceUrl) {
         String url;
 
         try {
             url = JABLOTRON_URL + "app/oasis/ajax/ovladani.php";
-            String urlParameters = "section=STATE&status=" + ((code.isEmpty()) ? "1" : "") + "&code=" + code;
+            String urlParameters = "section=" + section + "&status=" + status + "&code=" + code;
             byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
             URL cookieUrl = new URL(url);
