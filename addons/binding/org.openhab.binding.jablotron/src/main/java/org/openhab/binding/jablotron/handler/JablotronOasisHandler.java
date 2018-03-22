@@ -83,32 +83,6 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         }
     }
 
-    @Override
-    public void initialize() {
-        thingConfig = getConfigAs(DeviceConfig.class);
-        scheduler.schedule(() -> {
-            doInit();
-        }, 0, TimeUnit.SECONDS);
-    }
-
-    @Override
-    public void dispose() {
-        super.dispose();
-        logout();
-        if (future != null) {
-            future.cancel(true);
-        }
-    }
-
-    private void doInit() {
-        login();
-        initializeService();
-
-        future = scheduler.scheduleWithFixedDelay(() -> {
-            updateAlarmStatus();
-        }, 1, thingConfig.getRefresh(), TimeUnit.SECONDS);
-    }
-
     private void readAlarmStatus(OasisStatusResponse response) {
         logger.debug("Reading alarm status...");
         controlDisabled = response.isControlDisabled();
@@ -193,7 +167,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         }
     }
 
-    private synchronized boolean updateAlarmStatus() {
+    protected synchronized boolean updateAlarmStatus() {
         logger.debug("updating alarm status...");
 
         try {
@@ -268,25 +242,10 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         }
     }
 
-    private void relogin() {
-        logger.debug("Doing relogin");
-        logout(false);
-        login();
-        initializeService(false);
-    }
-
     private void updateLastEvent(OasisEvent event) {
-        updateChannel(CHANNEL_LAST_EVENT_CODE, event.getCode());
-        updateChannel(CHANNEL_LAST_EVENT, event.getEvent());
-        updateChannel(CHANNEL_LAST_EVENT_CLASS, event.getEventClass());
-    }
-
-    private void updateChannel(String channelName, String text) {
-        for (Channel channel : getThing().getChannels()) {
-            if (channel.getUID().getId().equals(channelName)) {
-                updateState(channel.getUID(), new StringType(text));
-            }
-        }
+        updateState(CHANNEL_LAST_EVENT_CODE, new StringType(event.getCode()));
+        updateState(CHANNEL_LAST_EVENT, new StringType(event.getEvent()));
+        updateState(CHANNEL_LAST_EVENT_CLASS, new StringType(event.getEventClass()));
     }
 
     public synchronized void controlSection(String section, String status, String serviceUrl) {
@@ -385,68 +344,12 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         }
     }
 
-    private void handleHttpRequestStatus(int status) throws InterruptedException {
-        switch (status) {
-            case 0:
-                logout();
-                break;
-            case 201:
-                logout();
-                break;
-            case 300:
-                logger.error("Redirect not supported");
-                break;
-            case 800:
-                login();
-                initializeService();
-                break;
-            case 200:
-                scheduler.schedule((Runnable) this::updateAlarmStatus, 1, TimeUnit.SECONDS);
-                scheduler.schedule((Runnable) this::updateAlarmStatus, 15, TimeUnit.SECONDS);
-                break;
-            default:
-                logger.error("Unknown status code received: {}", status);
-        }
-    }
 
     private synchronized JablotronControlResponse sendUserCode(String code, String serviceUrl) {
         return sendUserCode("STATE", code.isEmpty() ? "1" : "", code, serviceUrl);
     }
 
-    private synchronized JablotronControlResponse sendUserCode(String section, String status, String code, String serviceUrl) {
-        String url;
-
-        try {
-            url = JABLOTRON_URL + "app/oasis/ajax/ovladani.php";
-            String urlParameters = "section=" + section + "&status=" + status + "&code=" + code;
-            byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-
-            URL cookieUrl = new URL(url);
-            HttpsURLConnection connection = (HttpsURLConnection) cookieUrl.openConnection();
-            JablotronControlResponse response;
-
-            connection.setDoOutput(true);
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Referer", serviceUrl);
-            connection.setRequestProperty("Cookie", session);
-            connection.setRequestProperty("Content-Length", Integer.toString(postData.length));
-            connection.setRequestProperty("X-Requested-With", "XMLHttpRequest");
-            setConnectionDefaults(connection);
-            try (DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
-                wr.write(postData);
-            }
-            String line = Utils.readResponse(connection);
-            response = gson.fromJson(line, JablotronControlResponse.class);
-
-            logger.debug("sendUserCode result: {}", response.getVysledek());
-            return response;
-        } catch (Exception ex) {
-            logger.error("sendUserCode exception", ex);
-        }
-        return null;
-    }
-
-    private void logout(boolean setOffline) {
+    protected void logout(boolean setOffline) {
 
         String url = JABLOTRON_URL + "logout";
         try {
@@ -470,112 +373,6 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
             if (setOffline) {
                 updateStatus(ThingStatus.OFFLINE);
             }
-        }
-    }
-
-    private void logout() {
-        logout(true);
-    }
-
-    private void setConnectionDefaults(HttpsURLConnection connection) {
-        connection.setInstanceFollowRedirects(false);
-        connection.setRequestProperty("User-Agent", AGENT);
-        connection.setRequestProperty("Accept-Language", "cs-CZ");
-        connection.setRequestProperty("Accept-Encoding", "gzip, deflate");
-        connection.setUseCaches(false);
-        connection.setReadTimeout(READ_TIMEOUT);
-        connection.setConnectTimeout(CONNECT_TIMEOUT);
-    }
-
-    private synchronized void login() {
-        String url = null;
-
-        try {
-            //login
-            stavA = 0;
-            stavB = 0;
-            stavABC = 0;
-            stavPGX = 0;
-            stavPGY = 0;
-
-            JablotronBridgeHandler bridge = (JablotronBridgeHandler) this.getBridge().getHandler();
-            if (bridge == null) {
-                logger.error("Bridge handler is null!");
-                return;
-            }
-            url = JABLOTRON_URL + "ajax/login.php";
-            String urlParameters = "login=" + bridge.bridgeConfig.getLogin() + "&heslo=" + bridge.bridgeConfig.getPassword() + "&aStatus=200&loginType=Login";
-            byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-
-            URL cookieUrl = new URL(url);
-            HttpsURLConnection connection = (HttpsURLConnection) cookieUrl.openConnection();
-
-            connection.setDoOutput(true);
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Referer", JABLOTRON_URL);
-            connection.setRequestProperty("Content-Length", Integer.toString(postData.length));
-            connection.setRequestProperty("X-Requested-With", "XMLHttpRequest");
-
-            setConnectionDefaults(connection);
-            try (DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
-                wr.write(postData);
-            }
-
-            String line = Utils.readResponse(connection);
-            JablotronLoginResponse response = gson.fromJson(line, JablotronLoginResponse.class);
-
-            if (!response.isOKStatus())
-                return;
-
-            //get cookie
-            session = Utils.getSessionCookie(connection);
-            if (!session.equals("")) {
-                logger.debug("Successfully logged to Jablonet cloud!");
-            } else {
-                logger.error("Cannot log in to Jablonet cloud!");
-                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Cannot login to Jablonet cloud");
-            }
-
-        } catch (MalformedURLException e) {
-            logger.error("The URL '{}' is malformed", url, e);
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot login to Jablonet cloud");
-        } catch (Exception e) {
-            logger.error("Cannot get Jablotron login cookie", e);
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot login to Jablonet cloud");
-        }
-    }
-
-    private void initializeService() {
-        initializeService(true);
-    }
-
-    private void initializeService(boolean verbose) {
-        String url = thingConfig.getUrl();
-        String serviceId = thingConfig.getServiceId();
-        try {
-            URL cookieUrl = new URL(url);
-            HttpsURLConnection connection = (HttpsURLConnection) cookieUrl.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Referer", JABLOTRON_URL);
-            connection.setRequestProperty("Cookie", session);
-            connection.setRequestProperty("Upgrade-Insecure-Requests", "1");
-            setConnectionDefaults(connection);
-
-            if (connection.getResponseCode() == 200) {
-                if (verbose) {
-                    logger.info("Jablotron OASIS service: {} successfully initialized", serviceId);
-                } else {
-                    logger.debug("Jablotron OASIS service: {} successfully initialized", serviceId);
-                }
-                updateStatus(ThingStatus.ONLINE);
-            } else {
-                logger.error("Cannot initialize Jablotron service: {}", serviceId);
-                logger.error("Got response code: {}", connection.getResponseCode());
-                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Cannot initialize OASIS service");
-            }
-        } catch (Exception ex) {
-            logger.error("Cannot initialize Jablotron service: {}", serviceId, ex);
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Cannot initialize OASIS service");
         }
     }
 

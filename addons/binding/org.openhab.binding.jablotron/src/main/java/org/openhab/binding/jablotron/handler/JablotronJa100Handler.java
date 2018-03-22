@@ -94,32 +94,63 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                 sendCommand(command.toString(), thingConfig.getUrl());
             }, 0, TimeUnit.SECONDS);
         }
-    }
 
-    @Override
-    public void initialize() {
-        thingConfig = getConfigAs(DeviceConfig.class);
-        scheduler.schedule(() -> {
-            doInit();
-        }, 0, TimeUnit.SECONDS);
-    }
-
-    @Override
-    public void dispose() {
-        super.dispose();
-        logout();
-        if (future != null) {
-            future.cancel(true);
+        if(command instanceof OnOffType) {
+            String section = getSectionFromChannel(channelUID.getId());
+            
+            if(section != null) {
+                scheduler.schedule(() -> {
+                    controlSection(section, command.equals(OnOffType.ON) ? "1" : "0", thingConfig.getUrl());
+                }, 0, TimeUnit.SECONDS);
+            }
         }
     }
 
-    private void doInit() {
-        login();
-        initializeService();
-
-        future = scheduler.scheduleWithFixedDelay(() -> {
-            updateAlarmStatus();
-        }, 1, thingConfig.getRefresh(), TimeUnit.SECONDS);
+    private String getSectionFromChannel(String channel) {
+        switch(channel) {
+            case CHANNEL_STATUS_PGM_1:
+                return "PGM_1";
+            case CHANNEL_STATUS_PGM_2:
+                return "PGM_2";
+            case CHANNEL_STATUS_PGM_3:
+                return "PGM_3";
+            case CHANNEL_STATUS_PGM_4:
+                return "PGM_4";
+            case CHANNEL_STATUS_PGM_5:
+                return "PGM_5";
+            case CHANNEL_STATUS_PGM_6:
+                return "PGM_6";
+            case CHANNEL_STATUS_PGM_7:
+                return "PGM_7";
+            case CHANNEL_STATUS_PGM_8:
+                return "PGM_8";
+            case CHANNEL_STATUS_PGM_9:
+                return "PGM_9";
+            case CHANNEL_STATUS_PGM_10:
+                return "PGM_10";
+            case CHANNEL_STATUS_PGM_11:
+                return "PGM_11";
+            case CHANNEL_STATUS_PGM_12:
+                return "PGM_12";
+            case CHANNEL_STATUS_PGM_13:
+                return "PGM_13";
+            case CHANNEL_STATUS_PGM_14:
+                return "PGM_14";
+            case CHANNEL_STATUS_PGM_15:
+                return "PGM_15";
+            case CHANNEL_STATUS_PGM_16:
+                return "PGM_16";
+            case CHANNEL_STATUS_PGM_17:
+                return "PGM_17";
+            case CHANNEL_STATUS_PGM_18:
+                return "PGM_18";
+            case CHANNEL_STATUS_PGM_19:
+                return "PGM_19";
+            case CHANNEL_STATUS_PGM_20:
+                return "PGM_20";
+            default:
+                return null;
+        }
     }
 
     private void readAlarmStatus(Ja100StatusResponse response) {
@@ -350,7 +381,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         }
     }
 
-    private synchronized boolean updateAlarmStatus() {
+    protected synchronized boolean updateAlarmStatus() {
         logger.debug("updating alarm status...");
 
         try {
@@ -425,39 +456,15 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         }
     }
 
-    private void relogin() {
-        logger.debug("Doing relogin");
-        logout(false);
-        login();
-        initializeService(false);
-    }
-
     private void updateLastEvent(Ja100Event event) {
         //ZonedDateTime time = ZonedDateTime.parse("2018-03-15T18:07:32+01:00", DateTimeFormatter.ISO_DATE_TIME);
         //ZonedDateTime time = ZonedDateTime.parse(event.getDate(), DateTimeFormatter.ISO_DATE_TIME);
         //DateTimeType typ = new DateTimeType(time);
-        updateChannel(CHANNEL_LAST_EVENT_TIME, event.getZonedDateTime());
-        updateChannel(CHANNEL_LAST_EVENT_SECTION, event.getSection());
-        updateChannel(CHANNEL_LAST_EVENT, event.getEvent());
-        updateChannel(CHANNEL_LAST_EVENT_CLASS, event.getEventClass());
+        updateState(CHANNEL_LAST_EVENT_TIME, new DateTimeType(event.getZonedDateTime()));
+        updateState(CHANNEL_LAST_EVENT_SECTION, new StringType(event.getSection()));
+        updateState(CHANNEL_LAST_EVENT, new StringType(event.getEvent()));
+        updateState(CHANNEL_LAST_EVENT_CLASS, new StringType(event.getEventClass()));
     }
-
-    private void updateChannel(String channelName, String text) {
-        for (Channel channel : getThing().getChannels()) {
-            if (channel.getUID().getId().equals(channelName)) {
-                updateState(channel.getUID(), new StringType(text));
-            }
-        }
-    }
-
-    private void updateChannel(String channelName, ZonedDateTime date) {
-        for (Channel channel : getThing().getChannels()) {
-            if (channel.getUID().getId().equals(channelName)) {
-                updateState(channel.getUID(), new DateTimeType(date));
-            }
-        }
-    }
-
 
     public synchronized void sendCommand(String code, String serviceUrl) {
         int status = 0;
@@ -516,65 +523,38 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         }
     }
 
-    private void handleHttpRequestStatus(int status) throws InterruptedException {
-        switch (status) {
-            case 0:
-                logout();
-                break;
-            case 201:
-                logout();
-                break;
-            case 300:
-                logger.error("Redirect not supported");
-                break;
-            case 800:
-                login();
-                initializeService();
-                break;
-            case 200:
-                scheduler.schedule((Runnable) this::updateAlarmStatus, 1, TimeUnit.SECONDS);
-                scheduler.schedule((Runnable) this::updateAlarmStatus, 15, TimeUnit.SECONDS);
-                break;
-            default:
-                logger.error("Unknown status code received: {}", status);
-        }
-    }
 
     private synchronized JablotronControlResponse sendUserCode(String code, String serviceUrl) {
-        String url;
-
-        try {
-            url = JABLOTRON_URL + "app/ja100/ajax/ovladani.php";
-            String urlParameters = "section=STATE&status=" + ((code.isEmpty()) ? "1" : "") + "&code=" + code;
-            byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-
-            URL cookieUrl = new URL(url);
-            HttpsURLConnection connection = (HttpsURLConnection) cookieUrl.openConnection();
-            JablotronControlResponse response;
-
-            connection.setDoOutput(true);
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Referer", serviceUrl);
-            connection.setRequestProperty("Cookie", session);
-            connection.setRequestProperty("Content-Length", Integer.toString(postData.length));
-            connection.setRequestProperty("X-Requested-With", "XMLHttpRequest");
-            setConnectionDefaults(connection);
-            try (DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
-                wr.write(postData);
-            }
-            String line = Utils.readResponse(connection);
-            logger.info("sendUserCode response: {}", line);
-            response = gson.fromJson(line, JablotronControlResponse.class);
-
-            logger.debug("sendUserCode result: {}", response.getVysledek());
-            return response;
-        } catch (Exception ex) {
-            logger.error("sendUserCode exception", ex);
-        }
-        return null;
+        return sendUserCode("STATE", code.isEmpty() ? "1" : "", code, serviceUrl);
     }
 
-    private void logout(boolean setOffline) {
+    public synchronized void controlSection(String section, String status, String serviceUrl) {
+        try {
+            if (!getThing().getStatus().equals(ThingStatus.ONLINE)) {
+                login();
+                initializeService();
+            }
+            if (!updateAlarmStatus()) {
+                logger.error("Cannot control section due to alarm status!");
+                return;
+            }
+     
+            logger.debug("Controlling section: {} with status: {}", section, status);
+            JablotronControlResponse response = sendUserCode(section, status, "", serviceUrl);
+
+            if (response != null && response.getVysledek() != null) {
+                handleHttpRequestStatus(response.getStatus());
+            } else {
+                logger.warn("null response/status received");
+                logout();
+            }
+
+        } catch (Exception e) {
+            logger.error("internalReceiveCommand exception", e);
+        }
+    }
+    
+    protected void logout(boolean setOffline) {
 
         String url = JABLOTRON_URL + "logout";
         try {
@@ -598,123 +578,6 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             if (setOffline) {
                 updateStatus(ThingStatus.OFFLINE);
             }
-        }
-    }
-
-    private void logout() {
-        logout(true);
-    }
-
-    private void setConnectionDefaults(HttpsURLConnection connection) {
-        connection.setInstanceFollowRedirects(false);
-        connection.setRequestProperty("User-Agent", AGENT);
-        connection.setRequestProperty("Accept-Language", "cs-CZ");
-        connection.setRequestProperty("Accept-Encoding", "gzip, deflate");
-        connection.setUseCaches(false);
-        connection.setReadTimeout(READ_TIMEOUT);
-        connection.setConnectTimeout(CONNECT_TIMEOUT);
-    }
-
-    private synchronized void login() {
-        String url = null;
-
-        try {
-            //login
-            stav_1 = 0;
-            stav_2 = 0;
-            stav_3 = 0;
-            stav_4 = 0;
-            stav_5 = 0;
-            stav_6 = 0;
-            stav_7 = 0;
-            stav_8 = 0;
-            stav_9 = 0;
-            stav_10 = 0;
-            stav_11 = 0;
-            stav_12 = 0;
-            stav_13 = 0;
-            stav_14 = 0;
-            stav_15 = 0;
-
-            JablotronBridgeHandler bridge = (JablotronBridgeHandler) this.getBridge().getHandler();
-            if (bridge == null) {
-                logger.error("Bridge handler is null!");
-                return;
-            }
-            url = JABLOTRON_URL + "ajax/login.php";
-            String urlParameters = "login=" + bridge.bridgeConfig.getLogin() + "&heslo=" + bridge.bridgeConfig.getPassword() + "&aStatus=200&loginType=Login";
-            byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-
-            URL cookieUrl = new URL(url);
-            HttpsURLConnection connection = (HttpsURLConnection) cookieUrl.openConnection();
-
-            connection.setDoOutput(true);
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Referer", JABLOTRON_URL);
-            connection.setRequestProperty("Content-Length", Integer.toString(postData.length));
-            connection.setRequestProperty("X-Requested-With", "XMLHttpRequest");
-
-            setConnectionDefaults(connection);
-            try (DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
-                wr.write(postData);
-            }
-
-            String line = Utils.readResponse(connection);
-            logger.info("Login response: {}", line);
-            JablotronLoginResponse response = gson.fromJson(line, JablotronLoginResponse.class);
-
-            if (!response.isOKStatus())
-                return;
-
-            //get cookie
-            session = Utils.getSessionCookie(connection);
-            if (!session.equals("")) {
-                logger.debug("Successfully logged to Jablonet cloud!");
-            } else {
-                logger.error("Cannot log in to Jablonet cloud!");
-                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Cannot login to Jablonet cloud");
-            }
-
-        } catch (MalformedURLException e) {
-            logger.error("The URL '{}' is malformed", url, e);
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot login to Jablonet cloud");
-        } catch (Exception e) {
-            logger.error("Cannot get Jablotron login cookie", e);
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot login to Jablonet cloud");
-        }
-    }
-
-    private void initializeService() {
-        initializeService(true);
-    }
-
-    private void initializeService(boolean verbose) {
-        String url = thingConfig.getUrl();
-        String serviceId = thingConfig.getServiceId();
-        try {
-            URL cookieUrl = new URL(url);
-            HttpsURLConnection connection = (HttpsURLConnection) cookieUrl.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Referer", JABLOTRON_URL);
-            connection.setRequestProperty("Cookie", session);
-            connection.setRequestProperty("Upgrade-Insecure-Requests", "1");
-            setConnectionDefaults(connection);
-
-            if (connection.getResponseCode() == 200) {
-                if (verbose) {
-                    logger.info("Jablotron JA100 service: {} successfully initialized", serviceId);
-                } else {
-                    logger.debug("Jablotron JA100 service: {} successfully initialized", serviceId);
-                }
-                updateStatus(ThingStatus.ONLINE);
-            } else {
-                logger.error("Cannot initialize Jablotron service: {}", serviceId);
-                logger.error("Got response code: {} and message: {}", connection.getResponseCode(), connection.getResponseMessage());
-                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Cannot initialize JA100 service");
-            }
-        } catch (Exception ex) {
-            logger.error("Cannot initialize Jablotron service: {}", serviceId, ex);
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Cannot initialize JA100 service");
         }
     }
 
@@ -775,5 +638,4 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         }
         return null;
     }
-
 }
