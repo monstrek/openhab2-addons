@@ -28,7 +28,8 @@ public class Ja100StatusResponse {
     int status;
     JsonElement sekce;
     JsonElement pgm;
-    JsonElement alarm;
+    Integer isAlarm;
+    //JsonElement alarm;
     //boolean controlDisabled;
     //int service;
     //JsonElement vypis;
@@ -77,8 +78,7 @@ public class Ja100StatusResponse {
     }
 
     public boolean isAlarm() {
-        JsonArray alarmArray = alarm.getAsJsonArray();
-        return alarmArray.size() > 0;
+        return isAlarm != null && isAlarm.intValue() == 1;
     }
 
     public boolean hasEvents() {

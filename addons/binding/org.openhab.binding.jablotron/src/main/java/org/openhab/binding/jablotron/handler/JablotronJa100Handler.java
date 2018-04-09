@@ -8,14 +8,18 @@
  */
 package org.openhab.binding.jablotron.handler;
 
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.eclipse.smarthome.core.library.types.*;
-import org.eclipse.smarthome.core.thing.*;
+import org.eclipse.smarthome.core.thing.Channel;
+import org.eclipse.smarthome.core.thing.ChannelUID;
+import org.eclipse.smarthome.core.thing.Thing;
+import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
-import org.openhab.binding.jablotron.config.DeviceConfig;
 import org.openhab.binding.jablotron.internal.Utils;
-import org.openhab.binding.jablotron.model.*;
+import org.openhab.binding.jablotron.model.JablotronControlResponse;
 import org.openhab.binding.jablotron.model.ja100.Ja100Event;
 import org.openhab.binding.jablotron.model.ja100.Ja100StatusResponse;
 import org.openhab.binding.jablotron.model.oasis.OasisEvent;
@@ -24,14 +28,14 @@ import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.DataOutputStream;
-import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 
 import static org.openhab.binding.jablotron.JablotronBindingConstants.*;
@@ -89,25 +93,66 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
+        /*
         if (channelUID.getId().equals(CHANNEL_COMMAND) && command instanceof StringType) {
             scheduler.schedule(() -> {
                 sendCommand(command.toString(), thingConfig.getUrl());
             }, 0, TimeUnit.SECONDS);
-        }
+        }*/
 
-        if(command instanceof OnOffType) {
+        if (!isAlarmSection(channelUID.getId()) && command instanceof OnOffType) {
             String section = getSectionFromChannel(channelUID.getId());
-            
-            if(section != null) {
+
+            if (section != null) {
                 scheduler.schedule(() -> {
                     controlSection(section, command.equals(OnOffType.ON) ? "1" : "0", thingConfig.getUrl());
+                }, 0, TimeUnit.SECONDS);
+            }
+        }
+
+        if (isAlarmSection(channelUID.getId()) && command instanceof StringType) {
+            String section = getSectionFromChannel(channelUID.getId());
+            if (section != null) {
+                scheduler.schedule(() -> {
+                    //controlSection(section, command.toString(), thingConfig.getUrl());
+                    sendCommand(section, command.toString(), thingConfig.getUrl());
                 }, 0, TimeUnit.SECONDS);
             }
         }
     }
 
     private String getSectionFromChannel(String channel) {
-        switch(channel) {
+        switch (channel) {
+            case CHANNEL_STATUS_1:
+                return "STATE_1";
+            case CHANNEL_STATUS_2:
+                return "STATE_2";
+            case CHANNEL_STATUS_3:
+                return "STATE_3";
+            case CHANNEL_STATUS_4:
+                return "STATE_4";
+            case CHANNEL_STATUS_5:
+                return "STATE_5";
+            case CHANNEL_STATUS_6:
+                return "STATE_6";
+            case CHANNEL_STATUS_7:
+                return "STATE_7";
+            case CHANNEL_STATUS_8:
+                return "STATE_8";
+            case CHANNEL_STATUS_9:
+                return "STATE_9";
+            case CHANNEL_STATUS_10:
+                return "STATE_10";
+            case CHANNEL_STATUS_11:
+                return "STATE_11";
+            case CHANNEL_STATUS_12:
+                return "STATE_12";
+            case CHANNEL_STATUS_13:
+                return "STATE_13";
+            case CHANNEL_STATUS_14:
+                return "STATE_14";
+            case CHANNEL_STATUS_15:
+                return "STATE_15";
             case CHANNEL_STATUS_PGM_1:
                 return "PGM_1";
             case CHANNEL_STATUS_PGM_2:
@@ -151,6 +196,20 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             default:
                 return null;
         }
+    }
+
+    private boolean isAlarmSection(String channel) {
+        return channel.equals(CHANNEL_STATUS_1) || channel.equals(CHANNEL_STATUS_2) || channel.equals(CHANNEL_STATUS_3) ||
+                channel.equals(CHANNEL_STATUS_4) || channel.equals(CHANNEL_STATUS_5) || channel.equals(CHANNEL_STATUS_6) ||
+                channel.equals(CHANNEL_STATUS_7) ||
+                channel.equals(CHANNEL_STATUS_8) ||
+                channel.equals(CHANNEL_STATUS_9) ||
+                channel.equals(CHANNEL_STATUS_10) ||
+                channel.equals(CHANNEL_STATUS_11) ||
+                channel.equals(CHANNEL_STATUS_12) ||
+                channel.equals(CHANNEL_STATUS_13) ||
+                channel.equals(CHANNEL_STATUS_14) ||
+                channel.equals(CHANNEL_STATUS_15);
     }
 
     private void readAlarmStatus(Ja100StatusResponse response) {
@@ -404,6 +463,11 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                 initializeService();
                 response = sendGetStatusRequest();
             }
+            if (response == null) {
+                logger.error("Null status response received");
+                return false;
+            }
+
             if (response.isBusyStatus()) {
                 logger.warn("JA100 is busy...giving up");
                 logout();
@@ -466,7 +530,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         updateState(CHANNEL_LAST_EVENT_CLASS, new StringType(event.getEventClass()));
     }
 
-    public synchronized void sendCommand(String code, String serviceUrl) {
+    public synchronized void sendCommand(String section, String code, String serviceUrl) {
         int status = 0;
         Integer result = 0;
         try {
@@ -478,22 +542,8 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                 logger.error("Cannot send user code due to alarm status!");
                 return;
             }
-            /*
-            int timeout = 30;
-            while (controlDisabled && --timeout >= 0) {
-                logger.info("Waiting for control enabling...");
-                Thread.sleep(1000);
-                boolean ok = updateAlarmStatus();
-                if (!ok) {
-                    return;
-                }
-            }
-            if (timeout < 0) {
-                logger.warn("Timeout during waiting for control enabling");
-                return;
-            }*/
 
-            JablotronControlResponse response = sendUserCode("", serviceUrl);
+            JablotronControlResponse response = sendUserCode(section, "", serviceUrl);
             if (response == null) {
                 logger.warn("null response received");
                 return;
@@ -504,7 +554,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             if (result != null) {
                 if (status == 200 && result == 4) {
                     logger.debug("Sending user code: {}", code);
-                    response = sendUserCode(code, serviceUrl);
+                    response = sendUserCode(section, code, serviceUrl);
                 } else {
                     logger.warn("Received unknown status: {}", status);
                 }
@@ -524,8 +574,8 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
     }
 
 
-    private synchronized JablotronControlResponse sendUserCode(String code, String serviceUrl) {
-        return sendUserCode("STATE", code.isEmpty() ? "1" : "", code, serviceUrl);
+    private synchronized JablotronControlResponse sendUserCode(String section, String code, String serviceUrl) {
+        return sendUserCode(section, code.isEmpty() ? "1" : "", code, serviceUrl);
     }
 
     public synchronized void controlSection(String section, String status, String serviceUrl) {
@@ -538,7 +588,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                 logger.error("Cannot control section due to alarm status!");
                 return;
             }
-     
+
             logger.debug("Controlling section: {} with status: {}", section, status);
             JablotronControlResponse response = sendUserCode(section, status, "", serviceUrl);
 
@@ -553,7 +603,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             logger.error("internalReceiveCommand exception", e);
         }
     }
-    
+
     protected void logout(boolean setOffline) {
 
         String url = JABLOTRON_URL + "logout";
@@ -606,9 +656,9 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
 
             JsonParser parser = new JsonParser();
             JsonObject jobject = parser.parse(line).getAsJsonObject();
-            if(jobject.has("ResponseCode") && jobject.get("ResponseCode").getAsInt() == 200) {
+            if (jobject.has("ResponseCode") && jobject.get("ResponseCode").getAsInt() == 200) {
                 logger.info("History successfully retrieved with total of {} events.", jobject.get("EventsCount").getAsInt());
-                if(jobject.has("HistoryData")) {
+                if (jobject.has("HistoryData")) {
                     jobject = jobject.get("HistoryData").getAsJsonObject();
                     if (jobject.has("Events")) {
                         JsonArray jarray = jobject.get("Events").getAsJsonArray();
@@ -619,19 +669,6 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                     }
                 }
             }
-
-            /*
-            if (jobject.has("events")) {
-                jobject = jobject.get("events").getAsJsonObject();
-
-                for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
-                    String key = entry.getKey();
-                    if (jobject.get(key) instanceof JsonArray) {
-                        OasisEvent[] events = gson.fromJson(jobject.get(key), OasisEvent[].class);
-                        result.addAll(Arrays.asList(events));
-                    }
-                }
-            }*/
             return result;
         } catch (Exception ex) {
             logger.error("Cannot get Jablotron service history: {}", serviceId, ex);

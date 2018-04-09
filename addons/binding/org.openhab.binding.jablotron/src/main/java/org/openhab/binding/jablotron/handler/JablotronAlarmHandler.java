@@ -79,8 +79,8 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
                 wr.write(postData);
             }
             String line = Utils.readResponse(connection);
+            logger.info("Control response: {}", line);
             response = gson.fromJson(line, JablotronControlResponse.class);
-
             logger.debug("sendUserCode result: {}", response.getVysledek());
             return response;
         } catch (Exception ex) {

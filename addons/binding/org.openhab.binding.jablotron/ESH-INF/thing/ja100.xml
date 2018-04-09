@@ -28,7 +28,6 @@
 			<channel id="status_13" typeId="status_13"/>
 			<channel id="status_14" typeId="status_14"/>
 			<channel id="status_15" typeId="status_15"/>
-			<channel id="command" typeId="command"/>
 			<channel id="lastEvent" typeId="lastEvent"/>
 			<channel id="lastEventClass" typeId="lastEventClass"/>
 			<channel id="lastEventTime" typeId="lastEventTime"/>
