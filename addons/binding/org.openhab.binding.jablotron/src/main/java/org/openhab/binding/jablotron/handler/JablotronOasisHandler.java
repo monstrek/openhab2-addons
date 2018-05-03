@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2017 by the respective copyright holders.
- * <p>
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,10 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.eclipse.jetty.client.api.ContentResponse;
+import org.eclipse.jetty.client.util.StringContentProvider;
+import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.smarthome.core.library.types.DateTimeType;
 import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.OpenClosedType;
@@ -19,10 +23,8 @@ import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.*;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
-import org.openhab.binding.jablotron.config.DeviceConfig;
 import org.openhab.binding.jablotron.internal.Utils;
 import org.openhab.binding.jablotron.model.JablotronControlResponse;
-import org.openhab.binding.jablotron.model.JablotronLoginResponse;
 import org.openhab.binding.jablotron.model.oasis.OasisEvent;
 import org.openhab.binding.jablotron.model.oasis.OasisStatusResponse;
 import org.slf4j.Logger;
@@ -38,6 +40,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.openhab.binding.jablotron.JablotronBindingConstants.*;
 
@@ -147,18 +150,21 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
 
         String url = JABLOTRON_URL + "app/oasis/ajax/stav.php?" + Utils.getBrowserTimestamp();
         try {
-            URL cookieUrl = new URL(url);
+            ContentResponse resp = httpClient.newRequest(url)
+                    .method(HttpMethod.GET)
+                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
+                    .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
+                    .header(HttpHeader.REFERER, JABLOTRON_URL + OASIS_SERVICE_URL + thingConfig.getServiceId())
+                    .header("X-Requested-With", "XMLHttpRequest")
+                    .agent(AGENT)
+                    .timeout(15, TimeUnit.SECONDS)
+                    .send();
 
-            HttpsURLConnection connection = (HttpsURLConnection) cookieUrl.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Referer", JABLOTRON_URL + OASIS_SERVICE_URL + thingConfig.getServiceId());
-            connection.setRequestProperty("Cookie", session);
-            connection.setRequestProperty("X-Requested-With", "XMLHttpRequest");
-            setConnectionDefaults(connection);
+            String line = resp.getContentAsString();
+            logger.trace("get status: {}", line);
 
-            String line = Utils.readResponse(connection);
             return gson.fromJson(line, OasisStatusResponse.class);
-        } catch (SocketTimeoutException ste) {
+        } catch (TimeoutException ste) {
             logger.error("Timeout during getting alarm status!");
             return null;
         } catch (Exception e) {
@@ -183,12 +189,14 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
             OasisStatusResponse response = sendGetStatusRequest();
 
             if (response == null || response.getStatus() != 200) {
-                session = "";
                 controlDisabled = true;
                 inService = false;
                 login();
                 initializeService();
                 response = sendGetStatusRequest();
+                if(response == null) {
+                    return false;
+                }
             }
             if (response.isBusyStatus()) {
                 logger.warn("OASIS is busy...giving up");
@@ -223,7 +231,6 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
                 readAlarmStatus(response);
             } else {
                 logger.error("Cannot get alarm status!");
-                session = "";
                 return false;
             }
             for (Channel channel : getThing().getChannels()) {
@@ -353,23 +360,21 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
 
         String url = JABLOTRON_URL + "logout";
         try {
-            URL cookieUrl = new URL(url);
+            ContentResponse resp = httpClient.newRequest(url)
+                    .method(HttpMethod.GET)
+                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
+                    .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
+                    .header(HttpHeader.REFERER, JABLOTRON_URL + OASIS_SERVICE_URL + thingConfig.getServiceId())
+                    .agent(AGENT)
+                    .send();
+            String line = resp.getContentAsString();
 
-            HttpsURLConnection connection = (HttpsURLConnection) cookieUrl.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Referer", JABLOTRON_URL + OASIS_SERVICE_URL + thingConfig.getServiceId());
-            connection.setRequestProperty("Cookie", session);
-            connection.setRequestProperty("Upgrade-Insecure-Requests", "1");
-            setConnectionDefaults(connection);
-
-            String line = Utils.readResponse(connection);
             logger.debug("logout... {}", line);
         } catch (Exception e) {
             //Silence
         } finally {
             controlDisabled = true;
             inService = false;
-            session = "";
             if (setOffline) {
                 updateStatus(ThingStatus.OFFLINE);
             }
@@ -379,22 +384,21 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
     private ArrayList<OasisEvent> getServiceHistory() {
         String serviceId = thingConfig.getServiceId();
         try {
-            URL cookieUrl = new URL("https://www.jablonet.net/app/oasis/ajax/historie.php");
+            String url = "https://www.jablonet.net/app/oasis/ajax/historie.php";
             String urlParameters = "from=this_month&to=&gps=0&log=0&header=0";
-            byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
-            HttpsURLConnection connection = (HttpsURLConnection) cookieUrl.openConnection();
-            connection.setRequestMethod("POST");
-            connection.setDoOutput(true);
-            connection.setRequestProperty("Referer", JABLOTRON_URL);
-            connection.setRequestProperty("Cookie", session);
-            connection.setRequestProperty("Content-Length", Integer.toString(postData.length));
-            connection.setRequestProperty("X-Requested-With", "XMLHttpRequest");
-            setConnectionDefaults(connection);
-            try (DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
-                wr.write(postData);
-            }
-            String line = Utils.readResponse(connection);
+            ContentResponse resp = httpClient.newRequest(url)
+                    .method(HttpMethod.POST)
+                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
+                    .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
+                    .header(HttpHeader.REFERER, JABLOTRON_URL)
+                    .header("X-Requested-With", "XMLHttpRequest")
+                    .agent(AGENT)
+                    .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
+                    .send();
+
+            String line = resp.getContentAsString();
+
             logger.debug("History: {}", line);
 
             ArrayList<OasisEvent> result = new ArrayList<>();

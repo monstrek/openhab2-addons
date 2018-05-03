@@ -11,6 +11,10 @@ package org.openhab.binding.jablotron.handler;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.eclipse.jetty.client.api.ContentResponse;
+import org.eclipse.jetty.client.util.StringContentProvider;
+import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.smarthome.core.library.types.*;
 import org.eclipse.smarthome.core.thing.Channel;
 import org.eclipse.smarthome.core.thing.ChannelUID;
@@ -37,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.openhab.binding.jablotron.JablotronBindingConstants.*;
 
@@ -419,6 +424,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
 
         String url = JABLOTRON_URL + "app/ja100/ajax/stav.php?" + Utils.getBrowserTimestamp();
         try {
+            /*
             URL cookieUrl = new URL(url);
 
             HttpsURLConnection connection = (HttpsURLConnection) cookieUrl.openConnection();
@@ -429,9 +435,22 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             setConnectionDefaults(connection);
 
             String line = Utils.readResponse(connection);
+            */
+            ContentResponse resp = httpClient.newRequest(url)
+                    .method(HttpMethod.GET)
+                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
+                    .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
+                    .header(HttpHeader.REFERER, JABLOTRON_URL + JA100_SERVICE_URL + thingConfig.getServiceId())
+                    .header("X-Requested-With", "XMLHttpRequest")
+                    .agent(AGENT)
+                    .timeout(10, TimeUnit.SECONDS)
+                    .send();
+
+            String line = resp.getContentAsString();
+
             logger.info("getStatus response: {}", line);
             return gson.fromJson(line, Ja100StatusResponse.class);
-        } catch (SocketTimeoutException ste) {
+        } catch (TimeoutException ste) {
             logger.error("Timeout during getting alarm status!");
             return null;
         } catch (Exception e) {
@@ -456,7 +475,6 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             Ja100StatusResponse response = sendGetStatusRequest();
 
             if (response == null || response.getStatus() != 200) {
-                session = "";
                 //controlDisabled = true;
                 //inService = false;
                 login();
@@ -501,7 +519,6 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                 readAlarmStatus(response);
             } else {
                 logger.error("Cannot get alarm status!");
-                session = "";
                 return false;
             }
             for (Channel channel : getThing().getChannels()) {
@@ -608,6 +625,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
 
         String url = JABLOTRON_URL + "logout";
         try {
+            /*
             URL cookieUrl = new URL(url);
 
             HttpsURLConnection connection = (HttpsURLConnection) cookieUrl.openConnection();
@@ -618,13 +636,22 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             setConnectionDefaults(connection);
 
             String line = Utils.readResponse(connection);
+            */
+            ContentResponse resp = httpClient.newRequest(url)
+                    .method(HttpMethod.GET)
+                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
+                    .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
+                    .header(HttpHeader.REFERER, JABLOTRON_URL + JA100_SERVICE_URL + thingConfig.getServiceId())
+                    .agent(AGENT)
+                    .send();
+            String line = resp.getContentAsString();
+
             logger.debug("logout... {}", line);
         } catch (Exception e) {
             //Silence
         } finally {
             //controlDisabled = true;
             inService = false;
-            session = "";
             if (setOffline) {
                 updateStatus(ThingStatus.OFFLINE);
             }
@@ -634,8 +661,11 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
     private ArrayList<Ja100Event> getServiceHistory() {
         String serviceId = thingConfig.getServiceId();
         try {
-            URL cookieUrl = new URL("https://www.jablonet.net/app/ja100/ajax/historie.php");
+            String url = "https://www.jablonet.net/app/ja100/ajax/historie.php";
             String urlParameters = "from=this_month&to=&gps=0&log=0&header=0";
+            /*
+            URL cookieUrl = new URL(url);
+
             byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
             HttpsURLConnection connection = (HttpsURLConnection) cookieUrl.openConnection();
@@ -650,6 +680,19 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                 wr.write(postData);
             }
             String line = Utils.readResponse(connection);
+            */
+            ContentResponse resp = httpClient.newRequest(url)
+                    .method(HttpMethod.POST)
+                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
+                    .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
+                    .header(HttpHeader.REFERER, JABLOTRON_URL)
+                    .header("X-Requested-With", "XMLHttpRequest")
+                    .agent(AGENT)
+                    .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
+                    .send();
+
+            String line = resp.getContentAsString();
+
             logger.info("History response: {}", line);
 
             ArrayList<Ja100Event> result = new ArrayList<>();
