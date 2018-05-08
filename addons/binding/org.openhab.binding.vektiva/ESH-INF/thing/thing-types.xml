@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="vektiva"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 http://eclipse.org/smarthome/schemas/thing-description-1.0.0.xsd">
+
+	<!-- Sample Thing Type -->
+	<thing-type id="smarwi">
+		<label>Vektiva Smarwi Thing</label>
+		<description>Smarwi thing for Vektiva Binding</description>
+
+		<channels>
+			<channel id="control" typeId="control" />
+		</channels>
+
+		<config-description>
+			<parameter name="ip" type="text" required="true">
+				<label>Smarwi IP address</label>
+				<description>IP address of the Smarwi thing on the local network.</description>
+			</parameter>
+			<parameter name="refreshInterval" type="integer" required="true">
+				<label>Refresh Interval</label>
+				<description>The refresh interval to poll Smarwi thing (in s).</description>
+				<default>60</default>
+				<advanced>true</advanced>
+			</parameter>
+		</config-description>
+
+	</thing-type>
+
+	<!-- Control Channel Type -->
+	<channel-type id="control">
+		<item-type>Rollershutter</item-type>
+		<label>Smarwii Control Channel</label>
+		<description>Control channel for Smarwi thing.</description>
+	</channel-type>
+
+</thing:thing-descriptions>
