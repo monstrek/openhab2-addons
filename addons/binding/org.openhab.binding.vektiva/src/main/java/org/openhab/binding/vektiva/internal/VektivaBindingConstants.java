@@ -36,4 +36,7 @@ public class VektivaBindingConstants {
     public static final String COMMAND_OPEN = "open";
     public static final String COMMAND_CLOSE = "close";
     public static final String COMMAND_STOP = "stop";
+
+    // response
+    public static final String RESPONSE_OK = "OK";
 }

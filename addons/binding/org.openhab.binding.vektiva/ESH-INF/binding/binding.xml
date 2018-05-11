@@ -4,7 +4,7 @@
 	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/binding/v1.0.0 http://eclipse.org/smarthome/schemas/binding-1.0.0.xsd">
 
 	<name>Vektiva Binding</name>
-	<description>This is the binding for Vektiva.</description>
+	<description>This is the binding for Vektiva products.</description>
 	<author>Ondrej Pecta</author>
 
 </binding:binding>

@@ -10,18 +10,19 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.vektiva.internal;
+package org.openhab.binding.vektiva.internal.config;
 
 /**
- * The {@link SmarwiConfiguration} class contains fields mapping thing configuration parameters.
+ * The {@link VektivaSmarwiConfiguration} class contains fields mapping thing configuration parameters.
  *
  * @author Ondrej Pecta - Initial contribution
  */
-public class SmarwiConfiguration {
+public class VektivaSmarwiConfiguration {
 
     /**
      * Smarwi configuration parameter.
      */
     public String ip;
     public int refreshInterval;
+    public boolean useWebSockets;
 }

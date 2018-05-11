@@ -12,6 +12,7 @@
   <artifactId>org.openhab.binding.vektiva</artifactId>
   <packaging>eclipse-plugin</packaging>
 
+
   <name>Vektiva Binding</name>
 
 </project>

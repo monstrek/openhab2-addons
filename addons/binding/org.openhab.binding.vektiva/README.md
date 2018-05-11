@@ -22,7 +22,7 @@ If you want to change the polling frequency of thing availability and status, pl
 ## Channels
 
 The only exposed channel is named _control_ and is of type _Rolleshutter_.
-It reacts to standard roller shutter commands _UP/DOWN/STOP_. Percentual closure (dimmer) is not supported.
+It reacts to standard roller shutter commands _UP/DOWN/STOP_. The percentual closure (dimmer) is also supported - you can partially open window, but thing state is only open/close.
 
 ## Full Example
 
@@ -34,11 +34,13 @@ Thing vektiva:smarwi:5d43c74f [ ip="192.168.1.22", refreshInterval=30 ]
 *.items
 ```
 Rollershutter Smarwi "Smarwi [%d %%]" { channel="vektiva:smarwi:5d43c74f:control" }
+Dimmer SmarwiD "Smarwi [%.1f]" { channel="vektiva:smarwi:5d43c74f:control" }
 ```
 
 *.sitemap
 ```
 Default item=Smarwi
+Default item=SmarwiD
 ```
 ## Note
 

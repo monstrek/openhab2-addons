@@ -10,13 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.vektiva.internal;
 
 import static org.openhab.binding.vektiva.internal.VektivaBindingConstants.*;
 
 import java.util.Collections;
 import java.util.Set;
 
+import org.openhab.binding.vektiva.handler.VektivaSmarwiHandler;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.thing.Thing;
@@ -48,7 +48,7 @@ public class VektivaHandlerFactory extends BaseThingHandlerFactory {
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
         if (THING_TYPE_SMARWI.equals(thingTypeUID)) {
-            return new SmarwiHandler(thing);
+            return new VektivaSmarwiHandler(thing);
         }
 
         return null;

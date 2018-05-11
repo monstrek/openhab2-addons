@@ -10,42 +10,55 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.vektiva.internal;
+package org.openhab.binding.vektiva.handler;
 
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.http.HttpMethod;
-import org.eclipse.smarthome.core.library.types.DecimalType;
-import org.eclipse.smarthome.core.library.types.OpenClosedType;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.thing.*;
+import org.eclipse.smarthome.core.thing.ChannelUID;
+import org.eclipse.smarthome.core.thing.Thing;
+import org.eclipse.smarthome.core.thing.ThingStatus;
+import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
+import org.openhab.binding.vektiva.internal.config.VektivaSmarwiConfiguration;
+import org.openhab.binding.vektiva.internal.net.VektivaSmarwiiSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static org.openhab.binding.vektiva.internal.VektivaBindingConstants.*;
 
 /**
- * The {@link SmarwiHandler} is responsible for handling commands, which are
+ * The {@link VektivaSmarwiHandler} is responsible for handling commands, which are
  * sent to one of the channels.
  *
  * @author Ondrej Pecta - Initial contribution
  */
-public class SmarwiHandler extends BaseThingHandler {
+public class VektivaSmarwiHandler extends BaseThingHandler {
 
-    private final Logger logger = LoggerFactory.getLogger(SmarwiHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(VektivaSmarwiHandler.class);
 
-    private SmarwiConfiguration config;
+    private VektivaSmarwiConfiguration config;
 
     private HttpClient httpClient = new HttpClient();
 
-    public SmarwiHandler(Thing thing) {
+    private WebSocketClient webSocketClient = new WebSocketClient();
+
+    private Session session;
+
+    private int lastPosition = -1;
+
+    public VektivaSmarwiHandler(Thing thing) {
         super(thing);
     }
 
@@ -60,7 +73,14 @@ public class SmarwiHandler extends BaseThingHandler {
             logger.debug("Received command: {}", command.toString());
             String cmd = getSmarwiCommand(command);
             if (cmd.equals(COMMAND_OPEN) || cmd.equals(COMMAND_CLOSE) || cmd.equals(COMMAND_STOP)) {
-                sendCommand(cmd);
+                if (RESPONSE_OK.equals(sendCommand(cmd))) {
+                    lastPosition = cmd.equals(COMMAND_OPEN) ? 0 : 100;
+                }
+            }
+            if (command instanceof PercentType) {
+                if (RESPONSE_OK.equals(sendCommand(COMMAND_OPEN + "/" + cmd))) {
+                    lastPosition = Integer.parseInt(cmd);
+                }
             }
         }
     }
@@ -75,6 +95,20 @@ public class SmarwiHandler extends BaseThingHandler {
                 //silence
             }
         }
+        if (webSocketClient != null && webSocketClient.isStarted()) {
+            try {
+                webSocketClient.stop();
+            } catch (Exception e) {
+                //silence
+            }
+        }
+        closeSession();
+    }
+
+    private void closeSession() {
+        if (session != null && session.isOpen()) {
+            session.close();
+        }
     }
 
     private String getSmarwiCommand(Command command) {
@@ -86,23 +120,22 @@ public class SmarwiHandler extends BaseThingHandler {
             case "STOP":
                 return COMMAND_STOP;
             default:
-                logger.warn("Unknown smarwi command: {}!", command.toString());
-                return "N/A";
+                return command.toString();
         }
     }
 
-    private void sendCommand(String cmd) {
+    private String sendCommand(String cmd) {
         String url = "http://" + config.ip + "/cmd/" + cmd;
 
         try {
             ContentResponse resp = httpClient.newRequest(url).method(HttpMethod.GET).send();
-            logger.debug("Response: {}", resp.getContentAsString());
+            logger.trace("Response: {}", resp.getContentAsString());
             if (resp.getStatus() == 200) {
                 updateStatus(ThingStatus.ONLINE);
             } else {
                 updateStatus(ThingStatus.OFFLINE);
             }
-
+            return resp.getContentAsString();
         } catch (InterruptedException e) {
             logger.error("API execution has been interrupted", e);
             updateStatus(ThingStatus.OFFLINE);
@@ -113,11 +146,12 @@ public class SmarwiHandler extends BaseThingHandler {
             logger.error("Exception during API execution", e);
             updateStatus(ThingStatus.OFFLINE);
         }
+        return null;
     }
 
     @Override
     public void initialize() {
-        config = getConfigAs(SmarwiConfiguration.class);
+        config = getConfigAs(VektivaSmarwiConfiguration.class);
         if (config == null) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR);
             return;
@@ -135,6 +169,16 @@ public class SmarwiHandler extends BaseThingHandler {
         scheduler.scheduleWithFixedDelay(this::checkStatus, 0, config.refreshInterval, TimeUnit.SECONDS);
     }
 
+    private synchronized void initializeWebSocketSession() {
+        if (config.useWebSockets) {
+            closeSession();
+            session = createSession();
+            if (session != null) {
+                logger.debug("WebSocket connected!");
+            }
+        }
+    }
+
     private void checkStatus() {
         String url = "http://" + config.ip + "/statusn";
 
@@ -142,24 +186,44 @@ public class SmarwiHandler extends BaseThingHandler {
             ContentResponse resp = httpClient.newRequest(url).method(HttpMethod.GET).send();
             logger.debug("status values: {}", resp.getContentAsString());
             if (resp.getStatus() == 200) {
-                updateStatus(ThingStatus.ONLINE);
-                String[] values = resp.getContentAsString().split("\n");
-
-                updateProperty("type", getPropertyValue(values, "t"));
-                updateProperty("fw", getPropertyValue(values, "fw"));
-                updateProperty("rssi", getPropertyValue(values, "rssi"));
-                updateProperty("name", getPropertyValue(values, "cid"));
-                updateProperty("id", getPropertyValue(values, "id"));
-                updateProperty("status", getPropertyValue(values, "s"));
-                updateProperty("error", getPropertyValue(values, "e"));
-
-                updateState(CHANNEL_CONTROL, getPropertyValue(values, "pos").equals("o") ? new PercentType(0) : new PercentType(100));
+                processStatusResponse(resp.getContentAsString());
             } else {
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "got response code: " + resp.getStatus());
             }
+            // reconnect web socket if not connected
+            if (config.useWebSockets && (session == null || !session.isOpen()) && getThing().getStatus().equals(ThingStatus.ONLINE)) {
+                logger.debug("Initializing WebSocket session");
+                initializeWebSocketSession();
+            }
         } catch (Exception e) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "exception during status getting");
+            session = null;
         }
+    }
+
+    public synchronized void processStatusResponse(String content) {
+        updateStatus(ThingStatus.ONLINE);
+        String[] values = content.split("\n");
+
+        updateProperty("type", getPropertyValue(values, "t"));
+        updateProperty("fw", getPropertyValue(values, "fw"));
+        updateProperty("rssi", getPropertyValue(values, "rssi"));
+        updateProperty("name", getPropertyValue(values, "cid"));
+        updateProperty("status", getPropertyValue(values, "s"));
+        updateProperty("error", getPropertyValue(values, "e"));
+        updateProperty("ok", getPropertyValue(values, "ok"));
+        updateProperty("ro", getPropertyValue(values, "ro"));
+        updateProperty("fix", getPropertyValue(values, "fix"));
+
+        if ("1".equals(getPropertyValue(values, "ro"))) {
+            updateStatus(ThingStatus.ONLINE, ThingStatusDetail.NONE, "Online but not ready!");
+        }
+
+        int position = getPropertyValue(values, "pos").equals("o") ? 0 : 100;
+        if (position == 0 && lastPosition != -1) {
+            position = lastPosition;
+        }
+        updateState(CHANNEL_CONTROL, new PercentType(position));
     }
 
     private String getPropertyValue(String[] values, String property) {
@@ -168,10 +232,28 @@ public class SmarwiHandler extends BaseThingHandler {
             if (keyVal.length != 2) continue;
             String key = keyVal[0];
             String value = keyVal[1];
-            if(property.equals(key)) {
-               return value;
+            if (property.equals(key)) {
+                return value;
             }
         }
         return "N/A";
+    }
+
+    private Session createSession() {
+        String url = "ws://" + config.ip + "/ws";
+        URI uri = URI.create(url);
+
+        try {
+            webSocketClient.start();
+            // The socket that receives events
+            VektivaSmarwiiSocket socket = new VektivaSmarwiiSocket(this);
+            // Attempt Connect
+            Future<Session> fut = webSocketClient.connect(socket, uri);
+            // Wait for Connect
+            return fut.get();
+        } catch (Exception ex) {
+            logger.error("Cannot create websocket client/session", ex);
+        }
+        return null;
     }
 }
