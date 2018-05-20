@@ -29,6 +29,7 @@
     <module>org.openhab.binding.chromecast</module>
     <module>org.openhab.binding.cm11a</module>
     <module>org.openhab.binding.coolmasternet</module>
+    <module>org.openhab.binding.csas</module>
     <module>org.openhab.binding.dlinksmarthome</module>
     <module>org.openhab.binding.dscalarm</module>
     <module>org.openhab.binding.denonmarantz</module>
