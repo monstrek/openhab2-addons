@@ -13,6 +13,10 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.api.ContentResponse;
+import org.eclipse.jetty.http.HttpMethod;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.smarthome.core.cache.ExpiringCacheMap;
 import org.eclipse.smarthome.core.library.types.DateTimeType;
 import org.eclipse.smarthome.core.library.types.DecimalType;
@@ -22,19 +26,11 @@ import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.eclipse.smarthome.core.types.State;
-import org.openhab.binding.efergyengage.internal.EfergyEngageException;
 import org.openhab.binding.efergyengage.internal.config.EfergyEngageConfig;
 import org.openhab.binding.efergyengage.internal.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Calendar;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
@@ -55,6 +51,9 @@ public class EfergyEngageHandler extends BaseThingHandler {
     public EfergyEngageHandler(Thing thing) {
         super(thing);
     }
+
+    private SslContextFactory sslContextFactory = new SslContextFactory();
+    private HttpClient httpClient = new HttpClient(sslContextFactory);
 
     private String token = null;
     private int utcOffset;
@@ -93,6 +92,15 @@ public class EfergyEngageHandler extends BaseThingHandler {
         cache = new ExpiringCacheMap<>(CACHE_EXPIRY);
         cacheEstimate = new ExpiringCacheMap<>(CACHE_EXPIRY);
 
+        httpClient.setFollowRedirects(false);
+
+        try {
+            httpClient.start();
+        } catch (Exception e) {
+            logger.error("Cannot start http client!", e);
+            return;
+        }
+
         login();
         initPolling(refresh);
     }
@@ -100,14 +108,21 @@ public class EfergyEngageHandler extends BaseThingHandler {
     @Override
     public void dispose() {
         stopPolling();
+        if (httpClient != null && httpClient.isStarted()) {
+            try {
+                httpClient.stop();
+            } catch (Exception e) {
+                //silence
+            }
+        }
     }
 
     private void login() {
 
-        if(StringUtils.isNotBlank(thingConfig.getToken())) {
+        if (StringUtils.isNotBlank(thingConfig.getToken())) {
             token = thingConfig.getToken();
             EfergyEngageMeasurement measurement = readInstant();
-            if(measurement.getMilis() > 0) {
+            if (measurement.getMilis() > 0) {
                 updateStatus(ThingStatus.ONLINE);
             }
             return;
@@ -117,27 +132,23 @@ public class EfergyEngageHandler extends BaseThingHandler {
     }
 
     private EfergyEngageMeasurement readInstant() {
-        String url = null;
+        String url;
         EfergyEngageMeasurement measurement = new EfergyEngageMeasurement();
 
         try {
             url = EFERGY_URL + "/mobile_proxy/getCurrentValuesSummary?token=" + token;
-            URL valueUrl = new URL(url);
-            URLConnection connection = valueUrl.openConnection();
-            connection.setReadTimeout(READ_TIMEOUT);
-            connection.setConnectTimeout(CONNECT_TIMEOUT);
 
-            String line = readResponse(connection);
+            ContentResponse response = httpClient.newRequest(url).method(HttpMethod.GET).timeout(READ_TIMEOUT, TimeUnit.MILLISECONDS).send();
+            String line = response.getContentAsString();
 
             //read value
             EfergyEngageData[] data = gson.fromJson(line, EfergyEngageData[].class);
 
             if (data.length == 0) {
                 logger.error("Null data received: {}", line);
-                return null;
+                return measurement;
             }
-            for (int i = 0; i < data.length; i++) {
-                EfergyEngageData pwer = data[i];
+            for (EfergyEngageData pwer : data) {
                 if (!pwer.getCid().equals("PWER")) {
                     continue;
                 }
@@ -149,9 +160,6 @@ public class EfergyEngageHandler extends BaseThingHandler {
                     return measurement;
                 }
             }
-        } catch (MalformedURLException e) {
-            logger.error("The URL '{}' is malformed", url, e);
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR);
         } catch (Exception e) {
             logger.error("Cannot get Efergy Engage data", e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR);
@@ -282,21 +290,18 @@ public class EfergyEngageHandler extends BaseThingHandler {
     }
 
     private EfergyEngageMeasurement readEnergy(String period) {
-        String url = null;
+        String url;
         EfergyEngageMeasurement measurement = new EfergyEngageMeasurement();
 
         try {
             url = EFERGY_URL + "/mobile_proxy/getEnergy?token=" + token + "&period=" + period + "&offset=" + utcOffset;
-            URL valueUrl = new URL(url);
-            URLConnection connection = valueUrl.openConnection();
-            connection.setReadTimeout(READ_TIMEOUT);
-            connection.setConnectTimeout(CONNECT_TIMEOUT);
 
-            String line = readResponse(connection);
-
+            ContentResponse content = httpClient.newRequest(url).method(HttpMethod.GET).timeout(READ_TIMEOUT, TimeUnit.MILLISECONDS).send();
+            String line = content.getContentAsString();
             //read value
             EfergyEngageGetEnergyResponse response = gson.fromJson(line, EfergyEngageGetEnergyResponse.class);
-            Float energy = Float.valueOf(-1);
+
+            Float energy = (float) -1;
             String units = "";
             if (response.getError() == null) {
                 energy = response.getSum();
@@ -307,9 +312,6 @@ public class EfergyEngageHandler extends BaseThingHandler {
             }
             measurement.setValue(energy);
             measurement.setUnit(units);
-        } catch (MalformedURLException e) {
-            logger.error("The URL '{}' is malformed", url, e);
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR);
         } catch (Exception e) {
             logger.error("Cannot get Efergy Engage data", e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR);
@@ -318,16 +320,13 @@ public class EfergyEngageHandler extends BaseThingHandler {
     }
 
     private EfergyEngageEstimate readForecast() {
-        String url = null;
+        String url;
 
         try {
             url = EFERGY_URL + "/mobile_proxy/getForecast?token=" + token + "&dataType=cost&period=month&offset=" + utcOffset;
-            URL valueUrl = new URL(url);
-            URLConnection connection = valueUrl.openConnection();
-            connection.setReadTimeout(READ_TIMEOUT);
-            connection.setConnectTimeout(CONNECT_TIMEOUT);
 
-            String line = readResponse(connection);
+            ContentResponse content = httpClient.newRequest(url).method(HttpMethod.GET).timeout(READ_TIMEOUT, TimeUnit.MILLISECONDS).send();
+            String line = content.getContentAsString();
 
             //read value
             EfergyEngageGetForecastResponse response = gson.fromJson(line, EfergyEngageGetForecastResponse.class);
@@ -337,29 +336,10 @@ public class EfergyEngageHandler extends BaseThingHandler {
                 logger.error("{} - {}", response.getError().getDesc(), response.getError().getMore());
                 return null;
             }
-
-        } catch (MalformedURLException e) {
-            logger.error("The URL '{}' is malformed", url, e);
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR);
         } catch (Exception e) {
             logger.error("Cannot get Efergy Engage forecast", e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR);
         }
         return null;
     }
-
-    private String readResponse(URLConnection connection) throws IOException {
-        //read response
-        InputStream response = connection.getInputStream();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(response));
-        StringBuilder body = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            body.append(line).append("\n");
-        }
-        String msg = body.toString();
-        logger.debug("Response: {}", msg);
-        return msg;
-    }
-
 }
