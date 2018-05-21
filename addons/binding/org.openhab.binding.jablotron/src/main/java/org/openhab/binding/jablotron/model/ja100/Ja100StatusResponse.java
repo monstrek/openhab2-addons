@@ -9,7 +9,10 @@
 package org.openhab.binding.jablotron.model.ja100;
 
 import com.google.gson.*;
+import org.openhab.binding.jablotron.handler.JablotronBridgeHandler;
 import org.openhab.binding.jablotron.model.oasis.OasisEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -22,6 +25,8 @@ public class Ja100StatusResponse {
 
     private Gson gson = new Gson();
     private JsonParser parser = new JsonParser();
+
+    private final Logger logger = LoggerFactory.getLogger(JablotronBridgeHandler.class);
 
     //@SerializedName("last_entry")
     //OasisLastEntry lastEntry;
@@ -134,35 +139,61 @@ public class Ja100StatusResponse {
     }
 
     public int getSekceStatus(int sekceId) {
-        JsonObject jobject = sekce.getAsJsonObject();
 
-        for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
-            String key = entry.getKey();
-            if(key.equals(String.valueOf(sekceId))) {
-                if (jobject.get(key) instanceof JsonObject) {
-                    //each day
-                    JsonObject event = jobject.get(key).getAsJsonObject();
-                    return event.get("stav").getAsInt();
+        if (sekce.isJsonArray()) {
+            if (sekce.getAsJsonArray().size() > sekceId) {
+                JsonObject event = sekce.getAsJsonArray().get(sekceId).getAsJsonObject();
+                return event.get("stav").getAsInt();
+            }
+            return 0;
+        }
+
+        if (sekce.isJsonObject()) {
+            JsonObject jobject = sekce.getAsJsonObject();
+
+            for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
+                String key = entry.getKey();
+                if (key.equals(String.valueOf(sekceId))) {
+                    if (jobject.get(key) instanceof JsonObject) {
+                        //each day
+                        JsonObject event = jobject.get(key).getAsJsonObject();
+                        return event.get("stav").getAsInt();
+                    }
                 }
             }
+            return 0;
         }
+        logger.error("Cannot parse sekce response: {}", sekce.getAsString());
         return 0;
     }
 
     public int getPgmStatus(int pgmId) {
-        JsonObject jobject = pgm.getAsJsonObject();
 
-        for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
-            String key = entry.getKey();
-            if(key.equals(String.valueOf(pgmId))) {
-                if (jobject.get(key) instanceof JsonObject) {
-                    //each day
-                    JsonObject event = jobject.get(key).getAsJsonObject();
-                    return event.get("stav").getAsInt();
+        if (pgm.isJsonArray()) {
+            if (pgm.getAsJsonArray().size() > pgmId) {
+                JsonObject event = pgm.getAsJsonArray().get(pgmId).getAsJsonObject();
+                return event.get("stav").getAsInt();
+            }
+            return 0;
+        }
+
+        if (pgm.isJsonObject()) {
+            JsonObject jobject = pgm.getAsJsonObject();
+
+            for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
+                String key = entry.getKey();
+                if (key.equals(String.valueOf(pgmId))) {
+                    if (jobject.get(key) instanceof JsonObject) {
+                        //each day
+                        JsonObject event = jobject.get(key).getAsJsonObject();
+                        return event.get("stav").getAsInt();
+                    }
                 }
             }
+            return 0;
         }
-        return 0;
 
+        logger.error("Cannot parse pgm response: {}", pgm.getAsString());
+        return 0;
     }
 }
