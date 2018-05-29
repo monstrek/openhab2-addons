@@ -132,36 +132,42 @@ public class EfergyEngageHandler extends BaseThingHandler {
     }
 
     private EfergyEngageMeasurement readInstant() {
-        String url;
+        String url,line = "";
         EfergyEngageMeasurement measurement = new EfergyEngageMeasurement();
 
         try {
             url = EFERGY_URL + "/mobile_proxy/getCurrentValuesSummary?token=" + token;
 
             ContentResponse response = httpClient.newRequest(url).method(HttpMethod.GET).timeout(READ_TIMEOUT, TimeUnit.MILLISECONDS).send();
-            String line = response.getContentAsString();
+            line = response.getContentAsString();
 
-            //read value
-            EfergyEngageData[] data = gson.fromJson(line, EfergyEngageData[].class);
+            if(line.startsWith("{")) {
+                //error
+                EfergyEngageGetCurrentValuesResponse res = gson.fromJson(line, EfergyEngageGetCurrentValuesResponse.class);
+                logger.error("{} - {}", res.getError().getDesc(), res.getError().getMore());
+            } else {
+                //read value
+                EfergyEngageData[] data = gson.fromJson(line, EfergyEngageData[].class);
 
-            if (data.length == 0) {
-                logger.error("Null data received: {}", line);
-                return measurement;
-            }
-            for (EfergyEngageData pwer : data) {
-                if (!pwer.getCid().equals("PWER")) {
-                    continue;
-                }
-                JsonArray dataArray = pwer.getData();
-                JsonObject obj = dataArray.get(0).getAsJsonObject();
-                for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-                    measurement.setValue(entry.getValue().getAsFloat());
-                    measurement.setMilis(System.currentTimeMillis() - 1000 * pwer.getAge());
+                if (data.length == 0) {
+                    logger.error("Null data received: {}", line);
                     return measurement;
+                }
+                for (EfergyEngageData pwer : data) {
+                    if (!pwer.getCid().equals("PWER")) {
+                        continue;
+                    }
+                    JsonArray dataArray = pwer.getData();
+                    JsonObject obj = dataArray.get(0).getAsJsonObject();
+                    for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
+                        measurement.setValue(entry.getValue().getAsFloat());
+                        measurement.setMilis(System.currentTimeMillis() - 1000 * pwer.getAge());
+                        return measurement;
+                    }
                 }
             }
         } catch (Exception e) {
-            logger.error("Cannot get Efergy Engage data", e);
+            logger.error("Cannot get Efergy Engage data, got response: {}", line, e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR);
         }
 
