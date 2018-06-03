@@ -27,21 +27,25 @@ It reacts to standard roller shutter commands _UP/DOWN/STOP_. The percentual clo
 ## Full Example
 
 *.things:
+
 ```
 Thing vektiva:smarwi:5d43c74f [ ip="192.168.1.22", refreshInterval=30 ]
 ```
 
 *.items
+
 ```
 Rollershutter Smarwi "Smarwi [%d %%]" { channel="vektiva:smarwi:5d43c74f:control" }
 Dimmer SmarwiD "Smarwi [%.1f]" { channel="vektiva:smarwi:5d43c74f:control" }
 ```
 
 *.sitemap
+
 ```
 Default item=Smarwi
 Default item=SmarwiD
 ```
+
 ## Note
 
 This binding currently does not support control via vektiva.online cloud service.
