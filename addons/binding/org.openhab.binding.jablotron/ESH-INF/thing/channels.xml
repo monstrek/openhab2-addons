@@ -1,374 +1,374 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <thing:thing-descriptions bindingId="jablotron" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                          xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
-                          xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 http://eclipse.org/smarthome/schemas/thing-description-1.0.0.xsd">
+						xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
+						xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 http://eclipse.org/smarthome/schemas/thing-description-1.0.0.xsd">
 
-    <!-- Oasis -->
-    <!-- StatusA -->
-    <channel-type id="statusA">
-        <item-type>Switch</item-type>
-        <label>Alarm Zone A Status Channel</label>
-        <description>Status of the A zone of your alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- Oasis -->
+	<!-- StatusA -->
+	<channel-type id="statusA">
+		<item-type>Switch</item-type>
+		<label>Alarm Zone A Status Channel</label>
+		<description>Status of the A zone of your alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- StatusB -->
-    <channel-type id="statusB">
-        <item-type>Switch</item-type>
-        <label>Alarm B Status Channel</label>
-        <description>Status of the B zone of your alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- StatusB -->
+	<channel-type id="statusB">
+		<item-type>Switch</item-type>
+		<label>Alarm B Status Channel</label>
+		<description>Status of the B zone of your alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- StatusABC -->
-    <channel-type id="statusABC">
-        <item-type>Switch</item-type>
-        <label>Alarm Zone ABC Status Channel</label>
-        <description>Status of the ABC zone of your alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- StatusABC -->
+	<channel-type id="statusABC">
+		<item-type>Switch</item-type>
+		<label>Alarm Zone ABC Status Channel</label>
+		<description>Status of the ABC zone of your alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- StatusPGX -->
-    <channel-type id="statusPGX">
-        <item-type>Switch</item-type>
-        <label>OASIS PGX Status Channel</label>
-        <description>Status of the PGX switch of your OASIS alarm</description>
-    </channel-type>
+	<!-- StatusPGX -->
+	<channel-type id="statusPGX">
+		<item-type>Switch</item-type>
+		<label>OASIS PGX Status Channel</label>
+		<description>Status of the PGX switch of your OASIS alarm</description>
+	</channel-type>
 
-    <!-- StatusPGY -->
-    <channel-type id="statusPGY">
-        <item-type>Switch</item-type>
-        <label>OASIS PGY Status Channel</label>
-        <description>Status of the PGY switch of your OASIS alarm</description>
-    </channel-type>
+	<!-- StatusPGY -->
+	<channel-type id="statusPGY">
+		<item-type>Switch</item-type>
+		<label>OASIS PGY Status Channel</label>
+		<description>Status of the PGY switch of your OASIS alarm</description>
+	</channel-type>
 
-    <!-- JA100 -->
-    <channel-type id="status_1">
-        <item-type>Number</item-type>
-        <label>Alarm Section 1 Status Channel</label>
-        <description>Status of the section 1 of your alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- JA100 -->
+	<channel-type id="status_1">
+		<item-type>Number</item-type>
+		<label>Alarm Section 1 Status Channel</label>
+		<description>Status of the section 1 of your alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <channel-type id="status_2">
-        <item-type>Number</item-type>
-        <label>Alarm Section 2 Status Channel</label>
-        <description>Status of the section 2 of your alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<channel-type id="status_2">
+		<item-type>Number</item-type>
+		<label>Alarm Section 2 Status Channel</label>
+		<description>Status of the section 2 of your alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <channel-type id="status_3">
-        <item-type>Number</item-type>
-        <label>Alarm Section 3 Status Channel</label>
-        <description>Status of the section 3 of your alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<channel-type id="status_3">
+		<item-type>Number</item-type>
+		<label>Alarm Section 3 Status Channel</label>
+		<description>Status of the section 3 of your alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <channel-type id="status_4">
-        <item-type>Number</item-type>
-        <label>Alarm Section 4 Status Channel</label>
-        <description>Status of the section 4 of your alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<channel-type id="status_4">
+		<item-type>Number</item-type>
+		<label>Alarm Section 4 Status Channel</label>
+		<description>Status of the section 4 of your alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <channel-type id="status_5">
-        <item-type>Number</item-type>
-        <label>Alarm Section 5 Status Channel</label>
-        <description>Status of the section 5 of your alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<channel-type id="status_5">
+		<item-type>Number</item-type>
+		<label>Alarm Section 5 Status Channel</label>
+		<description>Status of the section 5 of your alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <channel-type id="status_6">
-        <item-type>Number</item-type>
-        <label>Alarm Section 6 Status Channel</label>
-        <description>Status of the section 6 of your alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<channel-type id="status_6">
+		<item-type>Number</item-type>
+		<label>Alarm Section 6 Status Channel</label>
+		<description>Status of the section 6 of your alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <channel-type id="status_7">
-        <item-type>Number</item-type>
-        <label>Alarm Section 7 Status Channel</label>
-        <description>Status of the section 7 of your alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<channel-type id="status_7">
+		<item-type>Number</item-type>
+		<label>Alarm Section 7 Status Channel</label>
+		<description>Status of the section 7 of your alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <channel-type id="status_8">
-        <item-type>Number</item-type>
-        <label>Alarm Section 8 Status Channel</label>
-        <description>Status of the section 8 of your alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<channel-type id="status_8">
+		<item-type>Number</item-type>
+		<label>Alarm Section 8 Status Channel</label>
+		<description>Status of the section 8 of your alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <channel-type id="status_9">
-        <item-type>Number</item-type>
-        <label>Alarm Section 9 Status Channel</label>
-        <description>Status of the section 9 of your alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<channel-type id="status_9">
+		<item-type>Number</item-type>
+		<label>Alarm Section 9 Status Channel</label>
+		<description>Status of the section 9 of your alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <channel-type id="status_10">
-        <item-type>Number</item-type>
-        <label>Alarm Section 10 Status Channel</label>
-        <description>Status of the section 10 of your alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<channel-type id="status_10">
+		<item-type>Number</item-type>
+		<label>Alarm Section 10 Status Channel</label>
+		<description>Status of the section 10 of your alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <channel-type id="status_11">
-        <item-type>Number</item-type>
-        <label>Alarm Section 11 Status Channel</label>
-        <description>Status of the section 11 of your alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<channel-type id="status_11">
+		<item-type>Number</item-type>
+		<label>Alarm Section 11 Status Channel</label>
+		<description>Status of the section 11 of your alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <channel-type id="status_12">
-        <item-type>Number</item-type>
-        <label>Alarm Section 12 Status Channel</label>
-        <description>Status of the section 12 of your alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<channel-type id="status_12">
+		<item-type>Number</item-type>
+		<label>Alarm Section 12 Status Channel</label>
+		<description>Status of the section 12 of your alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <channel-type id="status_13">
-        <item-type>Number</item-type>
-        <label>Alarm Section 13 Status Channel</label>
-        <description>Status of the section 13 of your alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<channel-type id="status_13">
+		<item-type>Number</item-type>
+		<label>Alarm Section 13 Status Channel</label>
+		<description>Status of the section 13 of your alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <channel-type id="status_14">
-        <item-type>Number</item-type>
-        <label>Alarm Section 14 Status Channel</label>
-        <description>Status of the section 14 of your alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<channel-type id="status_14">
+		<item-type>Number</item-type>
+		<label>Alarm Section 14 Status Channel</label>
+		<description>Status of the section 14 of your alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <channel-type id="status_15">
-        <item-type>Number</item-type>
-        <label>Alarm Section 15 Status Channel</label>
-        <description>Status of the section 15 of your alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<channel-type id="status_15">
+		<item-type>Number</item-type>
+		<label>Alarm Section 15 Status Channel</label>
+		<description>Status of the section 15 of your alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- StatusPGM_1 -->
-    <channel-type id="statusPGM_1">
-        <item-type>Switch</item-type>
-        <label>JA-100 PGM_1 Status Channel</label>
-        <description>Status of the PGM_1 switch of your JA-100 alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- StatusPGM_1 -->
+	<channel-type id="statusPGM_1">
+		<item-type>Switch</item-type>
+		<label>JA-100 PGM_1 Status Channel</label>
+		<description>Status of the PGM_1 switch of your JA-100 alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- StatusPGM_2 -->
-    <channel-type id="statusPGM_2">
-        <item-type>Switch</item-type>
-        <label>JA-100 PGM_2 Status Channel</label>
-        <description>Status of the PGM_2 switch of your JA-100 alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- StatusPGM_2 -->
+	<channel-type id="statusPGM_2">
+		<item-type>Switch</item-type>
+		<label>JA-100 PGM_2 Status Channel</label>
+		<description>Status of the PGM_2 switch of your JA-100 alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- StatusPGM_3 -->
-    <channel-type id="statusPGM_3">
-        <item-type>Switch</item-type>
-        <label>JA-100 PGM_3 Status Channel</label>
-        <description>Status of the PGM_3 switch of your JA-100 alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- StatusPGM_3 -->
+	<channel-type id="statusPGM_3">
+		<item-type>Switch</item-type>
+		<label>JA-100 PGM_3 Status Channel</label>
+		<description>Status of the PGM_3 switch of your JA-100 alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- StatusPGM_4 -->
-    <channel-type id="statusPGM_4">
-        <item-type>Switch</item-type>
-        <label>JA-100 PGM_4 Status Channel</label>
-        <description>Status of the PGM_4 switch of your JA-100 alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- StatusPGM_4 -->
+	<channel-type id="statusPGM_4">
+		<item-type>Switch</item-type>
+		<label>JA-100 PGM_4 Status Channel</label>
+		<description>Status of the PGM_4 switch of your JA-100 alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- StatusPGM_5 -->
-    <channel-type id="statusPGM_5">
-        <item-type>Switch</item-type>
-        <label>JA-100 PGM_5 Status Channel</label>
-        <description>Status of the PGM_5 switch of your JA-100 alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- StatusPGM_5 -->
+	<channel-type id="statusPGM_5">
+		<item-type>Switch</item-type>
+		<label>JA-100 PGM_5 Status Channel</label>
+		<description>Status of the PGM_5 switch of your JA-100 alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- StatusPGM_6 -->
-    <channel-type id="statusPGM_6">
-        <item-type>Switch</item-type>
-        <label>JA-100 PGM_6 Status Channel</label>
-        <description>Status of the PGM_6 switch of your JA-100 alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- StatusPGM_6 -->
+	<channel-type id="statusPGM_6">
+		<item-type>Switch</item-type>
+		<label>JA-100 PGM_6 Status Channel</label>
+		<description>Status of the PGM_6 switch of your JA-100 alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- StatusPGM_7 -->
-    <channel-type id="statusPGM_7">
-        <item-type>Switch</item-type>
-        <label>JA-100 PGM_7 Status Channel</label>
-        <description>Status of the PGM_7 switch of your JA-100 alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- StatusPGM_7 -->
+	<channel-type id="statusPGM_7">
+		<item-type>Switch</item-type>
+		<label>JA-100 PGM_7 Status Channel</label>
+		<description>Status of the PGM_7 switch of your JA-100 alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- StatusPGM_8 -->
-    <channel-type id="statusPGM_8">
-        <item-type>Switch</item-type>
-        <label>JA-100 PGM_8 Status Channel</label>
-        <description>Status of the PGM_8 switch of your JA-100 alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- StatusPGM_8 -->
+	<channel-type id="statusPGM_8">
+		<item-type>Switch</item-type>
+		<label>JA-100 PGM_8 Status Channel</label>
+		<description>Status of the PGM_8 switch of your JA-100 alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- StatusPGM_9 -->
-    <channel-type id="statusPGM_9">
-        <item-type>Switch</item-type>
-        <label>JA-100 PGM_9 Status Channel</label>
-        <description>Status of the PGM_9 switch of your JA-100 alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- StatusPGM_9 -->
+	<channel-type id="statusPGM_9">
+		<item-type>Switch</item-type>
+		<label>JA-100 PGM_9 Status Channel</label>
+		<description>Status of the PGM_9 switch of your JA-100 alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- StatusPGM_10 -->
-    <channel-type id="statusPGM_10">
-        <item-type>Switch</item-type>
-        <label>JA-100 PGM_10 Status Channel</label>
-        <description>Status of the PGM_10 switch of your JA-100 alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- StatusPGM_10 -->
+	<channel-type id="statusPGM_10">
+		<item-type>Switch</item-type>
+		<label>JA-100 PGM_10 Status Channel</label>
+		<description>Status of the PGM_10 switch of your JA-100 alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- StatusPGM_11 -->
-    <channel-type id="statusPGM_11">
-        <item-type>Switch</item-type>
-        <label>JA-100 PGM_11 Status Channel</label>
-        <description>Status of the PGM_11 switch of your JA-100 alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- StatusPGM_11 -->
+	<channel-type id="statusPGM_11">
+		<item-type>Switch</item-type>
+		<label>JA-100 PGM_11 Status Channel</label>
+		<description>Status of the PGM_11 switch of your JA-100 alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- StatusPGM_12 -->
-    <channel-type id="statusPGM_12">
-        <item-type>Switch</item-type>
-        <label>JA-100 PGM_12 Status Channel</label>
-        <description>Status of the PGM_12 switch of your JA-100 alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- StatusPGM_12 -->
+	<channel-type id="statusPGM_12">
+		<item-type>Switch</item-type>
+		<label>JA-100 PGM_12 Status Channel</label>
+		<description>Status of the PGM_12 switch of your JA-100 alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- StatusPGM_13 -->
-    <channel-type id="statusPGM_13">
-        <item-type>Switch</item-type>
-        <label>JA-100 PGM_13 Status Channel</label>
-        <description>Status of the PGM_13 switch of your JA-100 alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- StatusPGM_13 -->
+	<channel-type id="statusPGM_13">
+		<item-type>Switch</item-type>
+		<label>JA-100 PGM_13 Status Channel</label>
+		<description>Status of the PGM_13 switch of your JA-100 alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- StatusPGM_14 -->
-    <channel-type id="statusPGM_14">
-        <item-type>Switch</item-type>
-        <label>JA-100 PGM_14 Status Channel</label>
-        <description>Status of the PGM_14 switch of your JA-100 alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- StatusPGM_14 -->
+	<channel-type id="statusPGM_14">
+		<item-type>Switch</item-type>
+		<label>JA-100 PGM_14 Status Channel</label>
+		<description>Status of the PGM_14 switch of your JA-100 alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- StatusPGM_15 -->
-    <channel-type id="statusPGM_15">
-        <item-type>Switch</item-type>
-        <label>JA-100 PGM_15 Status Channel</label>
-        <description>Status of the PGM_15 switch of your JA-100 alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- StatusPGM_15 -->
+	<channel-type id="statusPGM_15">
+		<item-type>Switch</item-type>
+		<label>JA-100 PGM_15 Status Channel</label>
+		<description>Status of the PGM_15 switch of your JA-100 alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- StatusPGM_16 -->
-    <channel-type id="statusPGM_16">
-        <item-type>Switch</item-type>
-        <label>JA-100 PGM_16 Status Channel</label>
-        <description>Status of the PGM_16 switch of your JA-100 alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- StatusPGM_16 -->
+	<channel-type id="statusPGM_16">
+		<item-type>Switch</item-type>
+		<label>JA-100 PGM_16 Status Channel</label>
+		<description>Status of the PGM_16 switch of your JA-100 alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- StatusPGM_17 -->
-    <channel-type id="statusPGM_17">
-        <item-type>Switch</item-type>
-        <label>JA-100 PGM_17 Status Channel</label>
-        <description>Status of the PGM_17 switch of your JA-100 alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- StatusPGM_17 -->
+	<channel-type id="statusPGM_17">
+		<item-type>Switch</item-type>
+		<label>JA-100 PGM_17 Status Channel</label>
+		<description>Status of the PGM_17 switch of your JA-100 alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- StatusPGM_18 -->
-    <channel-type id="statusPGM_18">
-        <item-type>Switch</item-type>
-        <label>JA-100 PGM_18 Status Channel</label>
-        <description>Status of the PGM_18 switch of your JA-100 alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- StatusPGM_18 -->
+	<channel-type id="statusPGM_18">
+		<item-type>Switch</item-type>
+		<label>JA-100 PGM_18 Status Channel</label>
+		<description>Status of the PGM_18 switch of your JA-100 alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- StatusPGM_19 -->
-    <channel-type id="statusPGM_19">
-        <item-type>Switch</item-type>
-        <label>JA-100 PGM_19 Status Channel</label>
-        <description>Status of the PGM_19 switch of your JA-100 alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- StatusPGM_19 -->
+	<channel-type id="statusPGM_19">
+		<item-type>Switch</item-type>
+		<label>JA-100 PGM_19 Status Channel</label>
+		<description>Status of the PGM_19 switch of your JA-100 alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- StatusPGM_20 -->
-    <channel-type id="statusPGM_20">
-        <item-type>Switch</item-type>
-        <label>JA-100 PGM_20 Status Channel</label>
-        <description>Status of the PGM_20 switch of your JA-100 alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- StatusPGM_20 -->
+	<channel-type id="statusPGM_20">
+		<item-type>Switch</item-type>
+		<label>JA-100 PGM_20 Status Channel</label>
+		<description>Status of the PGM_20 switch of your JA-100 alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- Alarm -->
-    <channel-type id="alarm">
-        <item-type>Switch</item-type>
-        <label>Alarm Channel</label>
-        <description>Status of the alarm of your alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- Alarm -->
+	<channel-type id="alarm">
+		<item-type>Switch</item-type>
+		<label>Alarm Channel</label>
+		<description>Status of the alarm of your alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- Command -->
-    <channel-type id="command">
-        <item-type>String</item-type>
-        <label>Alarm Command Channel</label>
-        <description>Channel for sending commands to your alarm</description>
-        <state readOnly="false"/>
-    </channel-type>
+	<!-- Command -->
+	<channel-type id="command">
+		<item-type>String</item-type>
+		<label>Alarm Command Channel</label>
+		<description>Channel for sending commands to your alarm</description>
+		<state readOnly="false"/>
+	</channel-type>
 
-    <!-- LastEvent -->
-    <channel-type id="lastEvent">
-        <item-type>String</item-type>
-        <label>Alarm Last Event Text Description Channel</label>
-        <description>Text description of the last event of your alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- LastEvent -->
+	<channel-type id="lastEvent">
+		<item-type>String</item-type>
+		<label>Alarm Last Event Text Description Channel</label>
+		<description>Text description of the last event of your alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- LastEventCode -->
-    <channel-type id="lastEventCode">
-        <item-type>String</item-type>
-        <label>Alarm Last Event Code Channel</label>
-        <description>Code of the last event of your alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- LastEventCode -->
+	<channel-type id="lastEventCode">
+		<item-type>String</item-type>
+		<label>Alarm Last Event Code Channel</label>
+		<description>Code of the last event of your alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- LastEventClass -->
-    <channel-type id="lastEventClass">
-        <item-type>String</item-type>
-        <label>Alarm Last Event Class Channel</label>
-        <description>Class of the last event of your alarm (arm, disarm, ...)</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- LastEventClass -->
+	<channel-type id="lastEventClass">
+		<item-type>String</item-type>
+		<label>Alarm Last Event Class Channel</label>
+		<description>Class of the last event of your alarm (arm, disarm, ...)</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- LastEventSection -->
-    <channel-type id="lastEventSection">
-        <item-type>String</item-type>
-        <label>Alarm Last Event Section Channel</label>
-        <description>A last event section of your alarm (arm, disarm, ...)</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- LastEventSection -->
+	<channel-type id="lastEventSection">
+		<item-type>String</item-type>
+		<label>Alarm Last Event Section Channel</label>
+		<description>A last event section of your alarm (arm, disarm, ...)</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- LastEventTime -->
-    <channel-type id="lastEventTime">
-        <item-type>DateTime</item-type>
-        <label>Alarm Last Event Time Channel</label>
-        <description>Date and time of the last event of your alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- LastEventTime -->
+	<channel-type id="lastEventTime">
+		<item-type>DateTime</item-type>
+		<label>Alarm Last Event Time Channel</label>
+		<description>Date and time of the last event of your alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 
-    <!-- LastCheckTime -->
-    <channel-type id="lastCheckTime">
-        <item-type>DateTime</item-type>
-        <label>Alarm Last Check Time Channel</label>
-        <description>Date and time of last status check of your alarm</description>
-        <state readOnly="true"/>
-    </channel-type>
+	<!-- LastCheckTime -->
+	<channel-type id="lastCheckTime">
+		<item-type>DateTime</item-type>
+		<label>Alarm Last Check Time Channel</label>
+		<description>Date and time of last status check of your alarm</description>
+		<state readOnly="true"/>
+	</channel-type>
 </thing:thing-descriptions>

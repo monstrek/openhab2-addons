@@ -21,10 +21,12 @@ Binding itself doesn't require specific configuration.
 ## Thing Configuration
 
 The bridge thing requires this configuration:
+
 * login (login to your jablonet account)
 * password (password to your jablonet account)
 
 The oasis thing require this configuration (it is better to have it autodiscovered):
+
 * serviceId (Jablotron internal service id of your alarm)
 * url (an initialization url for the alarm)
 * refresh (thing status refresh period in seconds)

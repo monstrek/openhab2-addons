@@ -1,16 +1,16 @@
 /**
- * Copyright (c) 2010-2017 by the respective copyright holders.
+ * Copyright (c) 2010-2018 by the respective copyright holders.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.openhab.binding.jablotron.model.oasis;
+package org.openhab.binding.jablotron.internal.model.oasis;
 
 import com.google.gson.*;
 import com.google.gson.annotations.SerializedName;
-import org.openhab.binding.jablotron.model.JablotronSection;
+import org.openhab.binding.jablotron.internal.model.JablotronSection;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -19,6 +19,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 
+/**
+ * The {@link OasisStatusResponse} class defines the OASIS get status
+ * response.
+ *
+ * @author Ondrej Pecta - Initial contribution
+ */
 public class OasisStatusResponse {
 
     private Gson gson = new Gson();

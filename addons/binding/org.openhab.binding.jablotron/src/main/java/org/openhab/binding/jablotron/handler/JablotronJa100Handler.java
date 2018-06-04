@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2017 by the respective copyright holders.
+ * Copyright (c) 2010-2018 by the respective copyright holders.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -23,18 +23,13 @@ import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.jablotron.internal.Utils;
-import org.openhab.binding.jablotron.model.JablotronControlResponse;
-import org.openhab.binding.jablotron.model.ja100.Ja100Event;
-import org.openhab.binding.jablotron.model.ja100.Ja100StatusResponse;
-import org.openhab.binding.jablotron.model.oasis.OasisEvent;
+import org.openhab.binding.jablotron.internal.model.JablotronControlResponse;
+import org.openhab.binding.jablotron.internal.model.ja100.Ja100Event;
+import org.openhab.binding.jablotron.internal.model.ja100.Ja100StatusResponse;
+import org.openhab.binding.jablotron.internal.model.oasis.OasisEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.HttpsURLConnection;
-import java.io.DataOutputStream;
-import java.net.SocketTimeoutException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -592,7 +587,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
 
 
     private synchronized JablotronControlResponse sendUserCode(String section, String code, String serviceUrl) {
-        return sendUserCode(section, code.isEmpty() ? "1" : "", code, serviceUrl);
+        return sendUserCode("ovladani2.php", section, code.isEmpty() ? "1" : "", code, serviceUrl);
     }
 
     public synchronized void controlSection(String section, String status, String serviceUrl) {
@@ -607,7 +602,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             }
 
             logger.debug("Controlling section: {} with status: {}", section, status);
-            JablotronControlResponse response = sendUserCode(section, status, "", serviceUrl);
+            JablotronControlResponse response = sendUserCode("ovladani2.php", section, status, "", serviceUrl);
 
             if (response != null && response.getVysledek() != null) {
                 handleHttpRequestStatus(response.getStatus());

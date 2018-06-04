@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2010-2018 by the respective copyright holders.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.openhab.binding.jablotron.handler;
 
 import com.google.gson.Gson;
@@ -13,21 +21,23 @@ import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.openhab.binding.jablotron.config.DeviceConfig;
 import org.openhab.binding.jablotron.internal.Utils;
-import org.openhab.binding.jablotron.model.JablotronControlResponse;
-import org.openhab.binding.jablotron.model.JablotronLoginResponse;
+import org.openhab.binding.jablotron.internal.model.JablotronControlResponse;
+import org.openhab.binding.jablotron.internal.model.JablotronLoginResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.HttpsURLConnection;
-import java.io.DataOutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static org.openhab.binding.jablotron.JablotronBindingConstants.*;
 
+/**
+ * The {@link JablotronAlarmHandler} is responsible for handling commands, which are
+ * sent to one of the channels.
+ *
+ * @author Ondrej Pecta - Initial contribution
+ */
 public abstract class JablotronAlarmHandler extends BaseThingHandler {
 
     private final Logger logger = LoggerFactory.getLogger(JablotronAlarmHandler.class);
@@ -84,32 +94,13 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
         }, 0, TimeUnit.SECONDS);
     }
 
-    protected synchronized JablotronControlResponse sendUserCode(String section, String status, String code, String serviceUrl) {
+    protected synchronized JablotronControlResponse sendUserCode(String site, String section, String status, String code, String serviceUrl) {
         String url;
 
         try {
-            url = JABLOTRON_URL + "app/" + thing.getThingTypeUID().getId() + "/ajax/ovladani.php";
+            url = JABLOTRON_URL + "app/" + thing.getThingTypeUID().getId() + "/ajax/" + site;
             String urlParameters = "section=" + section + "&status=" + status + "&code=" + code;
 
-            /*
-            byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-
-            URL cookieUrl = new URL(url);
-            HttpsURLConnection connection = (HttpsURLConnection) cookieUrl.openConnection();
-            JablotronControlResponse response;
-
-            connection.setDoOutput(true);
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Referer", serviceUrl);
-            connection.setRequestProperty("Cookie", session);
-            connection.setRequestProperty("Content-Length", Integer.toString(postData.length));
-            connection.setRequestProperty("X-Requested-With", "XMLHttpRequest");
-            setConnectionDefaults(connection);
-            try (DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
-                wr.write(postData);
-            }
-            String line = Utils.readResponse(connection);
-            */
             ContentResponse resp = httpClient.newRequest(url)
                     .method(HttpMethod.POST)
                     .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
@@ -181,7 +172,7 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
         try {
             //login
 
-            JablotronBridgeHandler bridge = (JablotronBridgeHandler) this.getBridge().getHandler();
+            JablotronBridgeHandler bridge =  this.getBridge() != null ? (JablotronBridgeHandler) this.getBridge().getHandler() : null;
             if (bridge == null) {
                 logger.error("Bridge handler is null!");
                 return;
@@ -189,25 +180,6 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
             url = JABLOTRON_URL + "ajax/login.php";
             String urlParameters = "login=" + bridge.bridgeConfig.getLogin() + "&heslo=" + bridge.bridgeConfig.getPassword() + "&aStatus=200&loginType=Login";
 
-            /*
-            byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-
-            URL cookieUrl = new URL(url);
-            HttpsURLConnection connection = (HttpsURLConnection) cookieUrl.openConnection();
-
-            connection.setDoOutput(true);
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Referer", JABLOTRON_URL);
-            connection.setRequestProperty("Content-Length", Integer.toString(postData.length));
-            connection.setRequestProperty("X-Requested-With", "XMLHttpRequest");
-
-            setConnectionDefaults(connection);
-            try (DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
-                wr.write(postData);
-            }
-
-            String line = Utils.readResponse(connection);
-            */
             ContentResponse resp = httpClient.newRequest(url)
                     .method(HttpMethod.POST)
                     .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
@@ -260,15 +232,6 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
         String url = thingConfig.getUrl();
         String serviceId = thingConfig.getServiceId();
         try {
-            /*
-            URL cookieUrl = new URL(url);
-            HttpsURLConnection connection = (HttpsURLConnection) cookieUrl.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Referer", JABLOTRON_URL);
-            connection.setRequestProperty("Cookie", session);
-            connection.setRequestProperty("Upgrade-Insecure-Requests", "1");
-            setConnectionDefaults(connection);
-            */
             ContentResponse resp = httpClient.newRequest(url)
                     .method(HttpMethod.GET)
                     .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")

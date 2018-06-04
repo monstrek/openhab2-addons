@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2017 by the respective copyright holders.
+ * Copyright (c) 2010-2018 by the respective copyright holders.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,8 +20,8 @@ import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.jablotron.config.JablotronConfig;
 import org.openhab.binding.jablotron.internal.Utils;
 import org.openhab.binding.jablotron.internal.discovery.JablotronDiscoveryService;
-import org.openhab.binding.jablotron.model.JablotronLoginResponse;
-import org.openhab.binding.jablotron.model.JablotronWidgetsResponse;
+import org.openhab.binding.jablotron.internal.model.JablotronLoginResponse;
+import org.openhab.binding.jablotron.internal.model.JablotronWidgetsResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.eclipse.jetty.client.HttpClient;
@@ -32,12 +32,6 @@ import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 import javax.net.ssl.HttpsURLConnection;
-import java.io.DataOutputStream;
-import java.net.CookieStore;
-import java.net.HttpCookie;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
