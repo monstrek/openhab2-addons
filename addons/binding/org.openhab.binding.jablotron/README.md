@@ -7,6 +7,7 @@ https://www.jablotron.com/en/jablotron-products/alarms/
 
 * bridge (the bridge to your jablonet cloud account)
 * JA-80 OASIS alarm
+* JA-100 alarm (partial support, still under development)
  
 Please contact me if you want to add other alarms (e.g. JA-100 etc)
 

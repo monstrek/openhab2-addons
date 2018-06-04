@@ -543,8 +543,8 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
     }
 
     public synchronized void sendCommand(String section, String code, String serviceUrl) {
-        int status = 0;
-        Integer result = 0;
+        int status;
+        Integer result;
         try {
             if (!getThing().getStatus().equals(ThingStatus.ONLINE)) {
                 login();
@@ -620,18 +620,6 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
 
         String url = JABLOTRON_URL + "logout";
         try {
-            /*
-            URL cookieUrl = new URL(url);
-
-            HttpsURLConnection connection = (HttpsURLConnection) cookieUrl.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Referer", JABLOTRON_URL + JA100_SERVICE_URL + thingConfig.getServiceId());
-            connection.setRequestProperty("Cookie", session);
-            connection.setRequestProperty("Upgrade-Insecure-Requests", "1");
-            setConnectionDefaults(connection);
-
-            String line = Utils.readResponse(connection);
-            */
             ContentResponse resp = httpClient.newRequest(url)
                     .method(HttpMethod.GET)
                     .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
@@ -658,24 +646,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         try {
             String url = "https://www.jablonet.net/app/ja100/ajax/historie.php";
             String urlParameters = "from=this_month&to=&gps=0&log=0&header=0";
-            /*
-            URL cookieUrl = new URL(url);
 
-            byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-
-            HttpsURLConnection connection = (HttpsURLConnection) cookieUrl.openConnection();
-            connection.setRequestMethod("POST");
-            connection.setDoOutput(true);
-            connection.setRequestProperty("Referer", JABLOTRON_URL);
-            connection.setRequestProperty("Cookie", session);
-            connection.setRequestProperty("Content-Length", Integer.toString(postData.length));
-            connection.setRequestProperty("X-Requested-With", "XMLHttpRequest");
-            setConnectionDefaults(connection);
-            try (DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
-                wr.write(postData);
-            }
-            String line = Utils.readResponse(connection);
-            */
             ContentResponse resp = httpClient.newRequest(url)
                     .method(HttpMethod.POST)
                     .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")

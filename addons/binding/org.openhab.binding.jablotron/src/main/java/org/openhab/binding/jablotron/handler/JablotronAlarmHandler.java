@@ -101,6 +101,8 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
             url = JABLOTRON_URL + "app/" + thing.getThingTypeUID().getId() + "/ajax/" + site;
             String urlParameters = "section=" + section + "&status=" + status + "&code=" + code;
 
+            logger.info("Sending POST to url address: {} to control section: {}", url, section);
+
             ContentResponse resp = httpClient.newRequest(url)
                     .method(HttpMethod.POST)
                     .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
@@ -202,17 +204,6 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
             logger.error("Cannot get Jablotron login cookie", e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot login to Jablonet cloud");
         }
-    }
-
-
-    protected void setConnectionDefaults(HttpsURLConnection connection) {
-        connection.setInstanceFollowRedirects(false);
-        connection.setRequestProperty("User-Agent", AGENT);
-        connection.setRequestProperty("Accept-Language", "cs-CZ");
-        connection.setRequestProperty("Accept-Encoding", "gzip, deflate");
-        connection.setUseCaches(false);
-        connection.setReadTimeout(READ_TIMEOUT);
-        connection.setConnectTimeout(CONNECT_TIMEOUT);
     }
 
     protected void doInit() {
