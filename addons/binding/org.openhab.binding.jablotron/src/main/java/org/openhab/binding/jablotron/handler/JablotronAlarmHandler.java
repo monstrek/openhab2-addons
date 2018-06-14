@@ -111,6 +111,7 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
                     .header("X-Requested-With", "XMLHttpRequest")
                     .agent(AGENT)
                     .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
+                    .timeout(15, TimeUnit.SECONDS)
                     .send();
 
             String line = resp.getContentAsString();
@@ -190,6 +191,7 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
                     .header("X-Requested-With", "XMLHttpRequest")
                     .agent(AGENT)
                     .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
+                    .timeout(15, TimeUnit.SECONDS)
                     .send();
 
             String line = resp.getContentAsString();
@@ -229,6 +231,7 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
                     .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
                     .header(HttpHeader.REFERER, JABLOTRON_URL)
                     .agent(AGENT)
+                    .timeout(15, TimeUnit.SECONDS)
                     .send();
 
             if (resp.getStatus() == 200) {

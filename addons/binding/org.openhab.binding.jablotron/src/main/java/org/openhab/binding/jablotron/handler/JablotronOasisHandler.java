@@ -360,6 +360,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
                     .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
                     .header(HttpHeader.REFERER, JABLOTRON_URL + OASIS_SERVICE_URL + thingConfig.getServiceId())
                     .agent(AGENT)
+                    .timeout(5, TimeUnit.SECONDS)
                     .send();
             String line = resp.getContentAsString();
 
@@ -389,6 +390,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
                     .header("X-Requested-With", "XMLHttpRequest")
                     .agent(AGENT)
                     .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
+                    .timeout(15, TimeUnit.SECONDS)
                     .send();
 
             String line = resp.getContentAsString();

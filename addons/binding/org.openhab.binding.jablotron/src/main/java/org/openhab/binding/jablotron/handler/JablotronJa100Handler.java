@@ -438,7 +438,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                     .header(HttpHeader.REFERER, JABLOTRON_URL + JA100_SERVICE_URL + thingConfig.getServiceId())
                     .header("X-Requested-With", "XMLHttpRequest")
                     .agent(AGENT)
-                    .timeout(10, TimeUnit.SECONDS)
+                    .timeout(15, TimeUnit.SECONDS)
                     .send();
 
             String line = resp.getContentAsString();
@@ -626,6 +626,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                     .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
                     .header(HttpHeader.REFERER, JABLOTRON_URL + JA100_SERVICE_URL + thingConfig.getServiceId())
                     .agent(AGENT)
+                    .timeout(5, TimeUnit.SECONDS)
                     .send();
             String line = resp.getContentAsString();
 
@@ -655,6 +656,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                     .header("X-Requested-With", "XMLHttpRequest")
                     .agent(AGENT)
                     .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
+                    .timeout(15, TimeUnit.SECONDS)
                     .send();
 
             String line = resp.getContentAsString();
