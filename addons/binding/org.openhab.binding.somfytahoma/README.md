@@ -54,7 +54,7 @@ Please see the example below.
 | bridge        | N.A |  bridge does not expose any channel |
 | gateway       | version | firmware version of your Tahoma gateway |
 | gateway       | status  | status of your Tahoma gateway |
-| roller shutter, screen, venetian blind, garage door, awning & window | control |  device controller which reacts to commands UP/DOWN/STOP + closuse 0-100 |
+| roller shutter, screen, venetian blind, garage door, awning & window | control |  device controller which reacts to commands UP/DOWN/STOP + closure 0-100 |
 | venetian blind | orientation | percentual orientation of the blind's slats, it can have value 0-100). For IO Homecontrol devices only (non RTS)|
 | action group | execute_action | switch which reacts to ON command and triggers the predefined Tahoma action |
 | onoff, light | switch | reacts to standard ON/OFF commands |
@@ -78,7 +78,7 @@ Please see the example below.
 | heating system | target_temperature | target temperature of the heating system |
 | heating system | battery_level | battery level of the heating system | 
 
-When rolleshutter-like thing receives STOP command two possible behaviours are possible
+When roller shutter-like thing receives STOP command two possible behaviours are possible
 
 - when the roller shutter is idle then MY command is interpreted (the roller shutter/exterior screen/awning goes to your favourite position)
 - when the roller shutter is moving then STOP command is interpreted (the roller shutter/exterior screen/awning stops)

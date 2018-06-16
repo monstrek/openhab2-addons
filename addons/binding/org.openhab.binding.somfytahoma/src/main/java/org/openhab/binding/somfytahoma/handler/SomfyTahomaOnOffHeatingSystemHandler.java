@@ -59,6 +59,5 @@ public class SomfyTahomaOnOffHeatingSystemHandler extends SomfyTahomaBaseThingHa
                 sendCommand(COMMAND_SET_HEATINGLEVEL, param);
             }
         }
-
     }
 }
