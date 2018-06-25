@@ -24,7 +24,7 @@ import org.eclipse.smarthome.core.thing.*;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.jablotron.internal.Utils;
-import org.openhab.binding.jablotron.internal.model.JablotronControlResponse;
+import org.openhab.binding.jablotron.internal.model.oasis.OasisControlResponse;
 import org.openhab.binding.jablotron.internal.model.oasis.OasisEvent;
 import org.openhab.binding.jablotron.internal.model.oasis.OasisStatusResponse;
 import org.slf4j.Logger;
@@ -275,7 +275,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
 
 
             logger.debug("Controlling section: {} with status: {}", section, status);
-            JablotronControlResponse response = sendUserCode("ovladani.php", section, status, "", serviceUrl);
+            OasisControlResponse response = sendUserCode("ovladani.php", section, status, "", serviceUrl);
 
             if (response != null && response.getVysledek() != null) {
                 handleHttpRequestStatus(response.getStatus());
@@ -315,7 +315,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
                 return;
             }
 
-            JablotronControlResponse response = sendUserCode("", serviceUrl);
+            OasisControlResponse response = sendUserCode("", serviceUrl);
             if (response == null) {
                 logger.warn("null response received");
                 return;
@@ -345,8 +345,41 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         }
     }
 
+    protected synchronized OasisControlResponse sendUserCode(String site, String section, String status, String code, String serviceUrl) {
+        String url;
 
-    private synchronized JablotronControlResponse sendUserCode(String code, String serviceUrl) {
+        try {
+            url = JABLOTRON_URL + "app/" + thing.getThingTypeUID().getId() + "/ajax/" + site;
+            String urlParameters = "section=" + section + "&status=" + status + "&code=" + code;
+
+            logger.info("Sending POST to url address: {} to control section: {}", url, section);
+
+            ContentResponse resp = httpClient.newRequest(url)
+                    .method(HttpMethod.POST)
+                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
+                    .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
+                    .header(HttpHeader.REFERER, serviceUrl)
+                    .header("X-Requested-With", "XMLHttpRequest")
+                    .agent(AGENT)
+                    .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
+                    .timeout(15, TimeUnit.SECONDS)
+                    .send();
+
+            String line = resp.getContentAsString();
+
+
+
+            logger.info("Control response: {}", line);
+            OasisControlResponse response = gson.fromJson(line, OasisControlResponse.class);
+            logger.debug("sendUserCode result: {}", response.getVysledek());
+            return response;
+        } catch (Exception ex) {
+            logger.error("sendUserCode exception", ex);
+        }
+        return null;
+    }
+
+    private synchronized OasisControlResponse sendUserCode(String code, String serviceUrl) {
         return sendUserCode("ovladani.php", "STATE", code.isEmpty() ? "1" : "", code, serviceUrl);
     }
 

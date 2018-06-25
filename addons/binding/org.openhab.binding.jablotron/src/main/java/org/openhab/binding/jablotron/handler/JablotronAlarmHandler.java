@@ -21,12 +21,10 @@ import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.openhab.binding.jablotron.config.DeviceConfig;
 import org.openhab.binding.jablotron.internal.Utils;
-import org.openhab.binding.jablotron.internal.model.JablotronControlResponse;
 import org.openhab.binding.jablotron.internal.model.JablotronLoginResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -92,40 +90,6 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
         scheduler.schedule(() -> {
             doInit();
         }, 0, TimeUnit.SECONDS);
-    }
-
-    protected synchronized JablotronControlResponse sendUserCode(String site, String section, String status, String code, String serviceUrl) {
-        String url;
-
-        try {
-            url = JABLOTRON_URL + "app/" + thing.getThingTypeUID().getId() + "/ajax/" + site;
-            String urlParameters = "section=" + section + "&status=" + status + "&code=" + code;
-
-            logger.info("Sending POST to url address: {} to control section: {}", url, section);
-
-            ContentResponse resp = httpClient.newRequest(url)
-                    .method(HttpMethod.POST)
-                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
-                    .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
-                    .header(HttpHeader.REFERER, serviceUrl)
-                    .header("X-Requested-With", "XMLHttpRequest")
-                    .agent(AGENT)
-                    .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
-                    .timeout(15, TimeUnit.SECONDS)
-                    .send();
-
-            String line = resp.getContentAsString();
-
-
-
-            logger.info("Control response: {}", line);
-            JablotronControlResponse response = gson.fromJson(line, JablotronControlResponse.class);
-            logger.debug("sendUserCode result: {}", response.getVysledek());
-            return response;
-        } catch (Exception ex) {
-            logger.error("sendUserCode exception", ex);
-        }
-        return null;
     }
 
     protected abstract boolean updateAlarmStatus();
@@ -244,11 +208,11 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
             } else {
                 logger.error("Cannot initialize Jablotron service: {}", serviceId);
                 logger.error("Got response code: {}", resp.getStatus());
-                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Cannot initialize OASIS service");
+                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Cannot initialize " + thing.getThingTypeUID().getId() + " service");
             }
         } catch (Exception ex) {
             logger.error("Cannot initialize Jablotron service: {}", serviceId, ex);
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Cannot initialize OASIS service");
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Cannot initialize " + thing.getThingTypeUID().getId() + " service");
         }
     }
 }

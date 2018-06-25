@@ -23,7 +23,7 @@ import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.jablotron.internal.Utils;
-import org.openhab.binding.jablotron.internal.model.JablotronControlResponse;
+import org.openhab.binding.jablotron.internal.model.ja100.Ja100ControlResponse;
 import org.openhab.binding.jablotron.internal.model.ja100.Ja100Event;
 import org.openhab.binding.jablotron.internal.model.ja100.Ja100StatusResponse;
 import org.openhab.binding.jablotron.internal.model.oasis.OasisEvent;
@@ -555,23 +555,17 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                 return;
             }
 
-            JablotronControlResponse response = sendUserCode(section, "", serviceUrl);
+            Ja100ControlResponse response = sendUserCode(section, "", serviceUrl);
             if (response == null) {
                 logger.warn("null response received");
                 return;
             }
 
-            status = response.getStatus();
-            result = response.getVysledek();
+            status = response.getResponseCode();
+            result = response.getResult();
             if (result != null) {
-                if (status == 200 && result == 4) {
-                    logger.debug("Sending user code: {}", code);
-                    response = sendUserCode(section, code, serviceUrl);
-                } else {
-                    logger.warn("Received unknown status: {}", status);
-                }
-                if (response != null && response.getVysledek() != null) {
-                    handleHttpRequestStatus(response.getStatus());
+                if (response != null && response.getResult() != null) {
+                    handleHttpRequestStatus(response.getResponseCode());
                 } else {
                     logger.warn("null response/status received");
                     logout();
@@ -586,7 +580,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
     }
 
 
-    private synchronized JablotronControlResponse sendUserCode(String section, String code, String serviceUrl) {
+    private synchronized Ja100ControlResponse sendUserCode(String section, String code, String serviceUrl) {
         return sendUserCode("ovladani2.php", section, code.isEmpty() ? "1" : "", code, serviceUrl);
     }
 
@@ -602,10 +596,10 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             }
 
             logger.debug("Controlling section: {} with status: {}", section, status);
-            JablotronControlResponse response = sendUserCode("ovladani2.php", section, status, "", serviceUrl);
+            Ja100ControlResponse response = sendUserCode("ovladani2.php", section, status, "", serviceUrl);
 
-            if (response != null && response.getVysledek() != null) {
-                handleHttpRequestStatus(response.getStatus());
+            if (response != null && response.getResult() != null) {
+                handleHttpRequestStatus(response.getResponseCode());
             } else {
                 logger.warn("null response/status received");
                 logout();
@@ -614,6 +608,40 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         } catch (Exception e) {
             logger.error("internalReceiveCommand exception", e);
         }
+    }
+
+    protected synchronized Ja100ControlResponse sendUserCode(String site, String section, String status, String code, String serviceUrl) {
+        String url;
+
+        try {
+            url = JABLOTRON_URL + "app/" + thing.getThingTypeUID().getId() + "/ajax/" + site;
+            String urlParameters = "section=" + section + "&status=" + status + "&code=" + code;
+
+            logger.info("Sending POST to url address: {} to control section: {}", url, section);
+
+            ContentResponse resp = httpClient.newRequest(url)
+                    .method(HttpMethod.POST)
+                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
+                    .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
+                    .header(HttpHeader.REFERER, serviceUrl)
+                    .header("X-Requested-With", "XMLHttpRequest")
+                    .agent(AGENT)
+                    .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
+                    .timeout(15, TimeUnit.SECONDS)
+                    .send();
+
+            String line = resp.getContentAsString();
+
+
+
+            logger.info("Control response: {}", line);
+            Ja100ControlResponse response = gson.fromJson(line, Ja100ControlResponse.class);
+            logger.debug("sendUserCode result: {}", response.getResult());
+            return response;
+        } catch (Exception ex) {
+            logger.error("sendUserCode exception", ex);
+        }
+        return null;
     }
 
     protected void logout(boolean setOffline) {

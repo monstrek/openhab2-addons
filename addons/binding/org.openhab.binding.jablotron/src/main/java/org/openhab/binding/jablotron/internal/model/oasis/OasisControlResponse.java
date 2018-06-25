@@ -6,15 +6,15 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.openhab.binding.jablotron.internal.model;
+package org.openhab.binding.jablotron.internal.model.oasis;
 
 /**
- * The {@link JablotronControlResponse} class defines the get control
- * response.
+ * The {@link OasisControlResponse} class defines the control command
+ * response for OASIS.
  *
  * @author Ondrej Pecta - Initial contribution
  */
-public class JablotronControlResponse {
+public class OasisControlResponse {
     private Integer vysledek;
     private int status;
 
