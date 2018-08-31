@@ -121,14 +121,19 @@ public class EfergyEngageHandler extends BaseThingHandler {
 
         if (StringUtils.isNotBlank(thingConfig.getToken())) {
             token = thingConfig.getToken();
-            EfergyEngageMeasurement measurement = readInstant();
-            if (measurement.getMilis() > 0) {
+            EfergyEngageMac device = readStatus();
+            updateProperty("MAC", device.getMac());
+            updateProperty("Type", device.getType());
+            updateProperty("Version", device.getVersion());
+            if(device.getStatus().equals("on")) {
                 updateStatus(ThingStatus.ONLINE);
+            } else {
+                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Status: " + device.getStatus());
             }
             return;
         }
 
-        updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Please configure an application token!");
+        updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Please configure an application token!");
     }
 
     private EfergyEngageMeasurement readInstant() {
@@ -344,6 +349,27 @@ public class EfergyEngageHandler extends BaseThingHandler {
             }
         } catch (Exception e) {
             logger.error("Cannot get Efergy Engage forecast", e);
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR);
+        }
+        return null;
+    }
+
+    private EfergyEngageMac readStatus() {
+        String url;
+
+        try {
+            url = EFERGY_URL + "/mobile_proxy/getStatus?token=" + token;
+
+            ContentResponse content = httpClient.newRequest(url).method(HttpMethod.GET).timeout(READ_TIMEOUT, TimeUnit.MILLISECONDS).send();
+            String line = content.getContentAsString();
+
+            //read value
+            EfergyEngageGetStatusResponse response = gson.fromJson(line, EfergyEngageGetStatusResponse.class);
+            if(response.getListOfMacs() != null && response.getListOfMacs().size() > 0) {
+                return response.getListOfMacs().get(0);
+            }
+        } catch (Exception e) {
+            logger.error("Cannot get Efergy Engage status", e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR);
         }
         return null;

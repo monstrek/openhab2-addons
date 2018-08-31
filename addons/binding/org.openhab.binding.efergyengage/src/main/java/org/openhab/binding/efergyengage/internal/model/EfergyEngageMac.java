@@ -8,26 +8,33 @@
  */
 package org.openhab.binding.efergyengage.internal.model;
 
+import com.google.gson.JsonArray;
+
 /**
- * The {@link EfergyEngageGetTokenResponse} represents the model of
- * the login process response message.
+ * The {@link EfergyEngageMac} represents the model of
+ * the efergy engage device.
  *
  * @author Ondrej Pecta - Initial contribution
  */
-public class EfergyEngageGetTokenResponse {
+public class EfergyEngageMac {
+    String mac;
+    String type;
+    String version;
     String status;
-    String token;
-    String desc;
+
+    public String getMac() {
+        return mac;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getVersion() {
+        return version;
+    }
 
     public String getStatus() {
         return status;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public String getDesc() {
-        return desc;
     }
 }
