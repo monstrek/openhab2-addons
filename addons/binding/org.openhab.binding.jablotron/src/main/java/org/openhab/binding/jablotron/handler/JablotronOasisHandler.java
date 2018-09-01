@@ -151,7 +151,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
                     .header(HttpHeader.REFERER, JABLOTRON_URL + OASIS_SERVICE_URL + thingConfig.getServiceId())
                     .header("X-Requested-With", "XMLHttpRequest")
                     .agent(AGENT)
-                    .timeout(15, TimeUnit.SECONDS)
+                    .timeout(TIMEOUT, TimeUnit.SECONDS)
                     .send();
 
             String line = resp.getContentAsString();
@@ -159,7 +159,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
 
             return gson.fromJson(line, OasisStatusResponse.class);
         } catch (TimeoutException ste) {
-            logger.error("Timeout during getting alarm status!");
+            logger.debug("Timeout during getting alarm status!");
             return null;
         } catch (Exception e) {
             logger.error("sendGetStatusRequest exception", e);
@@ -362,17 +362,18 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
                     .header("X-Requested-With", "XMLHttpRequest")
                     .agent(AGENT)
                     .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
-                    .timeout(15, TimeUnit.SECONDS)
+                    .timeout(TIMEOUT, TimeUnit.SECONDS)
                     .send();
 
             String line = resp.getContentAsString();
-
 
 
             logger.info("Control response: {}", line);
             OasisControlResponse response = gson.fromJson(line, OasisControlResponse.class);
             logger.debug("sendUserCode result: {}", response.getVysledek());
             return response;
+        } catch (TimeoutException ex) {
+            logger.debug("sendUserCode timeout exception", ex);
         } catch (Exception ex) {
             logger.error("sendUserCode exception", ex);
         }
@@ -423,7 +424,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
                     .header("X-Requested-With", "XMLHttpRequest")
                     .agent(AGENT)
                     .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
-                    .timeout(15, TimeUnit.SECONDS)
+                    .timeout(TIMEOUT, TimeUnit.SECONDS)
                     .send();
 
             String line = resp.getContentAsString();
@@ -446,6 +447,8 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
                 }
             }
             return result;
+        } catch (TimeoutException ex) {
+            logger.debug("Timeout during getting Jablotron service history: {}", serviceId, ex);
         } catch (Exception ex) {
             logger.error("Cannot get Jablotron service history: {}", serviceId, ex);
         }

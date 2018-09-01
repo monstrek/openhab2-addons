@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.openhab.binding.jablotron.JablotronBindingConstants.*;
 
@@ -139,7 +140,7 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
         try {
             //login
 
-            JablotronBridgeHandler bridge =  this.getBridge() != null ? (JablotronBridgeHandler) this.getBridge().getHandler() : null;
+            JablotronBridgeHandler bridge = this.getBridge() != null ? (JablotronBridgeHandler) this.getBridge().getHandler() : null;
             if (bridge == null) {
                 logger.error("Bridge handler is null!");
                 return;
@@ -155,7 +156,7 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
                     .header("X-Requested-With", "XMLHttpRequest")
                     .agent(AGENT)
                     .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
-                    .timeout(15, TimeUnit.SECONDS)
+                    .timeout(TIMEOUT, TimeUnit.SECONDS)
                     .send();
 
             String line = resp.getContentAsString();
@@ -166,6 +167,9 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
                 return;
 
             logger.debug("Successfully logged to Jablonet cloud!");
+        } catch (TimeoutException e) {
+            logger.debug("Timeout during getting login cookie", e);
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot login to Jablonet cloud");
         } catch (Exception e) {
             logger.error("Cannot get Jablotron login cookie", e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot login to Jablonet cloud");
@@ -195,7 +199,7 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
                     .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
                     .header(HttpHeader.REFERER, JABLOTRON_URL)
                     .agent(AGENT)
-                    .timeout(15, TimeUnit.SECONDS)
+                    .timeout(TIMEOUT, TimeUnit.SECONDS)
                     .send();
 
             if (resp.getStatus() == 200) {
@@ -206,10 +210,13 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
                 }
                 updateStatus(ThingStatus.ONLINE);
             } else {
-                logger.error("Cannot initialize Jablotron service: {}", serviceId);
-                logger.error("Got response code: {}", resp.getStatus());
+                logger.debug("Cannot initialize Jablotron service: {}", serviceId);
+                logger.debug("Got response code: {}", resp.getStatus());
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Cannot initialize " + thing.getThingTypeUID().getId() + " service");
             }
+        } catch (TimeoutException e) {
+            logger.debug("Timeout during initializing Jablotron service: {}", serviceId, e);
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot initialize " + thing.getThingTypeUID().getId() + " service");
         } catch (Exception ex) {
             logger.error("Cannot initialize Jablotron service: {}", serviceId, ex);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Cannot initialize " + thing.getThingTypeUID().getId() + " service");

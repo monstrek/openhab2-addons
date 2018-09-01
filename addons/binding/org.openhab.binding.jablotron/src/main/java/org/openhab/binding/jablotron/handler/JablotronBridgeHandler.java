@@ -129,7 +129,7 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
                     .header("X-Requested-With", "XMLHttpRequest")
                     .agent(AGENT)
                     .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
-                    .timeout(15, TimeUnit.SECONDS)
+                    .timeout(TIMEOUT, TimeUnit.SECONDS)
                     .send();
 
             String line = resp.getContentAsString();
@@ -238,12 +238,12 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
                     .header(HttpHeader.REFERER, JABLOTRON_URL + "cloud")
                     .header("X-Requested-With", "XMLHttpRequest")
                     .agent(AGENT)
-                    .timeout(15, TimeUnit.SECONDS)
+                    .timeout(TIMEOUT, TimeUnit.SECONDS)
                     .send();
 
             String line = resp.getContentAsString();
 
-            logger.info("Response: {}", line);
+            logger.debug("Response: {}", line);
             JablotronWidgetsResponse response = gson.fromJson(line, JablotronWidgetsResponse.class);
 
             if (!response.isOKStatus()) {

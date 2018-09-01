@@ -438,7 +438,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                     .header(HttpHeader.REFERER, JABLOTRON_URL + JA100_SERVICE_URL + thingConfig.getServiceId())
                     .header("X-Requested-With", "XMLHttpRequest")
                     .agent(AGENT)
-                    .timeout(15, TimeUnit.SECONDS)
+                    .timeout(TIMEOUT, TimeUnit.SECONDS)
                     .send();
 
             String line = resp.getContentAsString();
@@ -446,7 +446,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             logger.info("getStatus response: {}", line);
             return gson.fromJson(line, Ja100StatusResponse.class);
         } catch (TimeoutException ste) {
-            logger.error("Timeout during getting alarm status!");
+            logger.debug("Timeout during getting alarm status!");
             return null;
         } catch (Exception e) {
             logger.error("sendGetStatusRequest exception", e);
@@ -627,17 +627,18 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                     .header("X-Requested-With", "XMLHttpRequest")
                     .agent(AGENT)
                     .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
-                    .timeout(15, TimeUnit.SECONDS)
+                    .timeout(TIMEOUT, TimeUnit.SECONDS)
                     .send();
 
             String line = resp.getContentAsString();
-
 
 
             logger.info("Control response: {}", line);
             Ja100ControlResponse response = gson.fromJson(line, Ja100ControlResponse.class);
             logger.debug("sendUserCode result: {}", response.getResult());
             return response;
+        } catch (TimeoutException ex) {
+            logger.debug("sendUserCode timeout exception", ex);
         } catch (Exception ex) {
             logger.error("sendUserCode exception", ex);
         }
@@ -684,7 +685,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                     .header("X-Requested-With", "XMLHttpRequest")
                     .agent(AGENT)
                     .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
-                    .timeout(15, TimeUnit.SECONDS)
+                    .timeout(TIMEOUT, TimeUnit.SECONDS)
                     .send();
 
             String line = resp.getContentAsString();
