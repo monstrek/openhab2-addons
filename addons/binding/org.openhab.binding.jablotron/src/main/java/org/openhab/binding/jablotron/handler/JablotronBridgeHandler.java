@@ -9,6 +9,12 @@
 package org.openhab.binding.jablotron.handler;
 
 import com.google.gson.Gson;
+import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.api.ContentResponse;
+import org.eclipse.jetty.client.util.StringContentProvider;
+import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.http.HttpMethod;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingStatus;
@@ -18,22 +24,13 @@ import org.eclipse.smarthome.core.thing.binding.BridgeHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.jablotron.config.JablotronConfig;
-import org.openhab.binding.jablotron.internal.Utils;
-import org.openhab.binding.jablotron.internal.discovery.JablotronDiscoveryService;
 import org.openhab.binding.jablotron.internal.model.JablotronLoginResponse;
-import org.openhab.binding.jablotron.internal.model.JablotronWidgetsResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.api.ContentResponse;
-import org.eclipse.jetty.client.util.StringContentProvider;
-import org.eclipse.jetty.http.HttpHeader;
-import org.eclipse.jetty.http.HttpMethod;
-import org.eclipse.jetty.util.ssl.SslContextFactory;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.openhab.binding.jablotron.JablotronBindingConstants.*;
 
@@ -49,8 +46,6 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
 
     private Gson gson = new Gson();
 
-    ScheduledFuture<?> future = null;
-
     // Instantiate and configure the SslContextFactory
     SslContextFactory sslContextFactory = new SslContextFactory(true);
 
@@ -59,8 +54,7 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
     /**
      * Our configuration
      */
-    protected JablotronConfig bridgeConfig;
-    private JablotronDiscoveryService discoveryService;
+    public JablotronConfig bridgeConfig;
 
     public JablotronBridgeHandler(Thing thing) {
         super(thing);
@@ -96,24 +90,19 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
             logger.error("Cannot start http client!", e);
             return;
         }
-
-        future = scheduler.schedule(this::startDiscovery, 1, TimeUnit.SECONDS);
+        scheduler.execute(this::login);
     }
 
     @Override
     public void dispose() {
         super.dispose();
         logout();
-        if(future != null) {
-            future.cancel(true);
-        }
         try {
             httpClient.stop();
         } catch (Exception e) {
             logger.error("Cannot stop http client", e);
         }
     }
-
 
 
     private void login() {
@@ -134,14 +123,6 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
 
             String line = resp.getContentAsString();
 
-            /*
-            CookieStore cookieStore = httpClient.getCookieStore();
-            for(HttpCookie cookie : cookieStore.getCookies()) {
-                if( cookie.getName().equals("PHPSESSID") ) {
-                    logger.info("got cookie: {}", cookie.getValue());
-                    session = "PHPSESSID=" + cookie.getValue();
-                }
-            }*/
             JablotronLoginResponse response = gson.fromJson(line, JablotronLoginResponse.class);
             if (!response.isOKStatus()) {
                 logger.error("Invalid response: {}", line);
@@ -149,181 +130,14 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
             }
             logger.debug("Successfully logged to Jablotron cloud!");
             updateStatus(ThingStatus.ONLINE);
-        }
-        catch(Exception ex) {
+        } catch (TimeoutException ex) {
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Timeout during login to Jablonet cloud");
+            scheduler.schedule(this::login, 30, TimeUnit.SECONDS);
+        } catch (Exception ex) {
             logger.error("Exception during login to Jablotron cloud: {}", ex.toString());
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot login to Jablonet cloud");
         }
     }
-
-    /*
-    private void login_old() {
-        String url = null;
-
-        try {
-            url = JABLOTRON_URL + "ajax/login.php";
-            String urlParameters = "login=" + bridgeConfig.getLogin() + "&heslo=" + bridgeConfig.getPassword() + "&aStatus=200&loginType=Login";
-            byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
-
-            URL cookieUrl = new URL(url);
-            HttpsURLConnection connection = (HttpsURLConnection) cookieUrl.openConnection();
-
-            connection.setDoOutput(true);
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Referer", JABLOTRON_URL);
-            connection.setRequestProperty("Content-Length", Integer.toString(postData.length));
-            connection.setRequestProperty("X-Requested-With", "XMLHttpRequest");
-
-            setConnectionDefaults(connection);
-            try (DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
-                wr.write(postData);
-            }
-
-            String line = Utils.readResponse(connection);
-            JablotronLoginResponse response = gson.fromJson(line, JablotronLoginResponse.class);
-
-            if (!response.isOKStatus()) {
-                logger.error("Invalid response: {}", line);
-                return;
-            }
-
-            //get cookie
-            session = Utils.getSessionCookie(connection);
-            if (!session.equals("")) {
-                logger.debug("Successfully logged to Jablotron cloud!");
-                updateStatus(ThingStatus.ONLINE);
-            } else {
-                logger.error("Cannot log in to Jablotron cloud!");
-                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Cannot login to Jablonet cloud");
-            }
-
-        } catch (MalformedURLException e) {
-            logger.error("The URL '{}' is malformed: {}", url, e.toString());
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot login to Jablonet cloud");
-        } catch (Exception e) {
-            logger.error("Cannot get Jablotron login cookie: {}", e.toString());
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot login to Jablonet cloud");
-        }
-    }*/
-
-    private void setConnectionDefaults(HttpsURLConnection connection) {
-        connection.setInstanceFollowRedirects(false);
-        connection.setRequestProperty("User-Agent", AGENT);
-        connection.setRequestProperty("Accept-Language", "cs-CZ");
-        connection.setRequestProperty("Accept-Encoding", "gzip, deflate");
-        connection.setUseCaches(false);
-    }
-
-    public void setDiscoveryService(JablotronDiscoveryService jablotronDiscoveryService) {
-        this.discoveryService = jablotronDiscoveryService;
-    }
-
-    public void startDiscovery() {
-        login();
-        if (!thing.getStatus().equals(ThingStatus.ONLINE)) {
-            return;
-        }
-        discoverServices();
-        logout();
-    }
-
-    private void discoverServices() {
-        try {
-            String url = JABLOTRON_URL + "ajax/widget-new.php?" + Utils.getBrowserTimestamp();
-
-            ContentResponse resp = httpClient.newRequest(url)
-                    .method(HttpMethod.GET)
-                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
-                    .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
-                    .header(HttpHeader.REFERER, JABLOTRON_URL + "cloud")
-                    .header("X-Requested-With", "XMLHttpRequest")
-                    .agent(AGENT)
-                    .timeout(TIMEOUT, TimeUnit.SECONDS)
-                    .send();
-
-            String line = resp.getContentAsString();
-
-            logger.debug("Response: {}", line);
-            JablotronWidgetsResponse response = gson.fromJson(line, JablotronWidgetsResponse.class);
-
-            if (!response.isOKStatus()) {
-                logger.error("Invalid widgets response: {}", line);
-                return;
-            }
-
-            if (response.getCntWidgets() == 0) {
-                logger.error("Cannot found any Jablotron device");
-                return;
-            }
-
-            for (int i = 0; i < response.getCntWidgets(); i++) {
-                String serviceId = String.valueOf(response.getWidgets().get(i).getId());
-                url = response.getWidgets().get(i).getUrl();
-                logger.debug("Found Jablotron service: {} id: {}", response.getWidgets().get(i).getName(), serviceId);
-
-                String device = response.getWidgets().get(i).getTemplateService();
-                if (device.equals(THING_TYPE_OASIS.getId())) {
-                    discoveryService.oasisDiscovered("Jablotron OASIS Alarm", serviceId, url);
-                }
-                else if (device.equals(THING_TYPE_JA100.getId())) {
-                    discoveryService.ja100Discovered("Jablotron JA100 Alarm", serviceId, url);
-                }
-                else {
-                    logger.error("Unsupported device type discovered: {} with serviceId: {} and url: {}", response.getWidgets().get(i).getTemplateService(), serviceId, url);
-                }
-            }
-        } catch (Exception ex) {
-            logger.error("Cannot discover Jablotron services!", ex);
-        }
-    }
-
-    /*
-    private void discoverServices_old() {
-        try {
-            String url = JABLOTRON_URL + "ajax/widget-new.php?" + Utils.getBrowserTimestamp();
-
-            URL cookieUrl = new URL(url);
-            HttpsURLConnection connection = (HttpsURLConnection) cookieUrl.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Referer", JABLOTRON_URL + "cloud");
-            connection.setRequestProperty("Cookie", session);
-            connection.setRequestProperty("X-Requested-With", "XMLHttpRequest");
-            setConnectionDefaults(connection);
-
-            String line = Utils.readResponse(connection);
-            logger.info("Response: {}", line);
-            JablotronWidgetsResponse response = gson.fromJson(line, JablotronWidgetsResponse.class);
-
-            if (!response.isOKStatus()) {
-                logger.error("Invalid widgets response: {}", line);
-                return;
-            }
-
-            if (response.getCntWidgets() == 0) {
-                logger.error("Cannot found any Jablotron device");
-                return;
-            }
-
-            for (int i = 0; i < response.getCntWidgets(); i++) {
-                String serviceId = String.valueOf(response.getWidgets().get(i).getId());
-                url = response.getWidgets().get(i).getUrl();
-                logger.debug("Found Jablotron service: {} id: {}", response.getWidgets().get(i).getName(), serviceId);
-
-                String device = response.getWidgets().get(i).getTemplateService();
-                if (device.equals(THING_TYPE_OASIS.getId())) {
-                    discoveryService.oasisDiscovered("Jablotron OASIS Alarm", serviceId, url);
-                }
-                else if (device.equals(THING_TYPE_JA100.getId())) {
-                    discoveryService.ja100Discovered("Jablotron JA100 Alarm", serviceId, url);
-                }
-                else {
-                    logger.error("Unsupported device type discovered: {} with serviceId: {} and url: {}", response.getWidgets().get(i).getTemplateService(), serviceId, url);
-                }
-            }
-        } catch (Exception ex) {
-            logger.error("Cannot discover Jablotron services!", ex);
-        }
-    }*/
 
     private void logout() {
 

@@ -81,6 +81,7 @@ public class JablotronHandlerFactory extends BaseThingHandlerFactory {
 
     private synchronized void registerItemDiscoveryService(JablotronBridgeHandler bridgeHandler) {
         JablotronDiscoveryService discoveryService = new JablotronDiscoveryService(bridgeHandler);
+        discoveryService.activate(null);
         this.discoveryServiceRegs.put(bridgeHandler.getThing().getUID(), bundleContext
                 .registerService(DiscoveryService.class.getName(), discoveryService, new Hashtable<String, Object>()));
 

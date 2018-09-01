@@ -105,7 +105,7 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
         logger.debug("Doing relogin");
         logout(false);
         login();
-        initializeService(false);
+        initializeService();
     }
 
 
@@ -186,10 +186,6 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
     }
 
     protected void initializeService() {
-        initializeService(true);
-    }
-
-    protected void initializeService(boolean verbose) {
         String url = thingConfig.getUrl();
         String serviceId = thingConfig.getServiceId();
         try {
@@ -203,11 +199,7 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
                     .send();
 
             if (resp.getStatus() == 200) {
-                if (verbose) {
-                    logger.info("Jablotron {} service: {} successfully initialized", thing.getThingTypeUID().getId(), serviceId);
-                } else {
-                    logger.debug("Jablotron {} service: {} successfully initialized", thing.getThingTypeUID().getId(), serviceId);
-                }
+                logger.debug("Jablotron {} service: {} successfully initialized", thing.getThingTypeUID().getId(), serviceId);
                 updateStatus(ThingStatus.ONLINE);
             } else {
                 logger.debug("Cannot initialize Jablotron service: {}", serviceId);

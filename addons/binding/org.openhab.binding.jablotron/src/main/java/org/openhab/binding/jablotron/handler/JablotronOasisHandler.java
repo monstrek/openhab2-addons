@@ -176,7 +176,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
             if (lastHours >= 0 && lastHours != hours) {
                 relogin();
             } else {
-                initializeService(false);
+                initializeService();
             }
             lastHours = hours;
 

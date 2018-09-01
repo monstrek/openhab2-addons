@@ -463,7 +463,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             if (lastHours >= 0 && lastHours != hours) {
                 relogin();
             } else {
-                initializeService(false);
+                initializeService();
             }
             lastHours = hours;
 
