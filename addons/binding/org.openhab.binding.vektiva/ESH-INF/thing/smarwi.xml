@@ -4,7 +4,7 @@
 	xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
 	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 http://eclipse.org/smarthome/schemas/thing-description-1.0.0.xsd">
 
-	<!-- Sample Thing Type -->
+	<!-- Smarwi Thing -->
 	<thing-type id="smarwi">
 		<label>Vektiva Smarwi Thing</label>
 		<description>Smarwi thing for Vektiva Binding</description>
@@ -37,7 +37,7 @@
 	<!-- Control Channel Type -->
 	<channel-type id="control">
 		<item-type>Rollershutter</item-type>
-		<label>Smarwii Control Channel</label>
+		<label>Control</label>
 		<description>Control channel for Smarwi thing.</description>
 	</channel-type>
 
