@@ -30,7 +30,9 @@ public class AmbilightService implements PhilipsTvService {
       } else if (CHANNEL_AMBILIGHT_HUE_POWER.equals(channel) && (command instanceof OnOffType)) {
         setAmbilightHuePowerState(handler.credentials, command, handler.target);
       } else {
-        logger.warn("Unknown command: {} for Channel {}", command, channel);
+        if(!(command instanceof RefreshType)) {
+          logger.warn("Unknown command: {} for Channel {}", command, channel);
+        }
       }
     } catch (Exception e) {
       if (isTvOfflineException(e)) {

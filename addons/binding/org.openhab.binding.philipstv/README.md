@@ -1,52 +1,57 @@
 # <bindingName> Binding
 
-_Give some details about what this binding is meant for - a protocol, system, specific device._
-
-_If possible, provide some resources like pictures, a YouTube video, etc. to give an impression of what can be done with this binding. You can place such resources into a `doc` folder next to this README.md._
-
+Philips TV Binding for 2016+ Series, which use the Android TV OS and Jointspace v6+.
 ## Supported Things
 
-_Please describe the different supported things / devices within this section._
-_Which different types are supported, which models were tested etc.?_
-_Note that it is planned to generate some part of this based on the XML files within ```ESH-INF/thing``` of your binding._
+Only Philips TVs produced in the year 2016 or later, using the Android TV OS.
 
+Tested TV models:
+-   55PUS7101/12
 ## Discovery
 
-_Describe the available auto-discovery features here. Mention for what it works and what needs to be kept in mind when using it._
-
-## Binding Configuration
-
-_If your binding requires or supports general configuration settings, please create a folder ```cfg``` and place the configuration file ```<bindingId>.cfg``` inside it. In this section, you should link to this file and provide some information about the options. The file could e.g. look like:_
-
-```
-# Configuration for the Philips Hue Binding
-#
-# Default secret key for the pairing of the Philips Hue Bridge.
-# It has to be between 10-40 (alphanumeric) characters 
-# This may be changed by the user for security reasons.
-secret=EclipseSmartHome
-```
-
-_Note that it is planned to generate some part of this based on the information that is available within ```ESH-INF/binding``` of your binding._
-
-_If your binding does not offer any generic configurations, you can remove this section completely._
+The TV must be turned on in order to be discovered. It will be initial named after its TV model description.
+ 
+ Afterwards the one-time pairing process must be worked through.
 
 ## Thing Configuration
 
-_Describe what is needed to manually configure a thing, either through the (Paper) UI or via a thing-file. This should be mainly about its mandatory and optional configuration parameters. A short example entry for a thing file can help!_
 
-_Note that it is planned to generate some part of this based on the XML files within ```ESH-INF/thing``` of your binding._
+You need to pair your TV first, in order to control it:
+1.  As soon as you add the discovered TV in your inbox as a Thing, the pairing process will start.
+2.  A Pairing Code will be presented on your TV.
+3.  Go to the created Thing (in PaperUI: Configuration > Things) and set the Pairing Code as a Configuration Parameter.
+4. Your TV is now fully controllable.
 
 ## Channels
 
-_Here you should provide information about available channel types, what their meaning is and how they can be used._
+TVs support the following channels:
 
-_Note that it is planned to generate some part of this based on the XML files within ```ESH-INF/thing``` of your binding._
+| Channel Type ID  | Item Type | Description                                                                                             |
+|------------------|-----------|---------------------------------------------------------------------------------------------------------|
+| volume           | Number    | Volume level of the TV.                                                                                 |
+| mute             | Switch    | Mute state of the TV.                                                                                   |
+| AppName          | String    | Name of the current running App. Changing this to a value from the available App List in this Item, starts an Application.                                                                             |
+| AppIcon          | Image     | Icon of the current running App.                                                                               |
+| tvChannel        | String    | Name of the current TV channel. Changing this to a value from the available TV Channel List in this Item, starts a TV Channel.                                                                             |
+| player           | Player    | Player item which emulates the infrared remote controller actions.                                                         |
+| searchContent    | String    | Changing this value toggles the Google Assisntant search on the TV for the given input.                                                           |
+| power            | Switch    | TV power. Turning on only works in combination with Wake-On-LAN.                        |
+| keyCode          | String    | The key code channel emulates the infrared remote controller and allows to send virtual button presses. |
+| ambilightPower   | Switch    | Ambilight power control.                        | 
+| ambilightHuePower| Switch    | Ambilight + Hue power control.                        |
 
 ## Full Example
 
-_Provide a full usage example based on textual configuration files (*.things, *.items, *.sitemap)._
-
-## Any custom content here!
-
-_Feel free to add additional sections for whatever you think should also be mentioned about your binding!_
+```
+Number PhilipsTV_Volume "Philips TV - Volume" {channel="philipstv:tv:5AFEF00D_BABE_DADA_FA5A_1c5a6bef9271:volume"}
+Switch PhilipsTV_Power "Philips TV - Power" (channel="philipstv:tv:5AFEF00D_BABE_DADA_FA5A_1c5a6bef9271:power"}
+Switch PhilipsTV_Mute "Philips TV - Mute" {channel="philipstv:tv:5AFEF00D_BABE_DADA_FA5A_1c5a6bef9271:mute"}
+String PhilipsTV_Key_Code "Philips TV - Key Code emulation" {channel="philipstv:tv:5AFEF00D_BABE_DADA_FA5A_1c5a6bef9271:keyCode"}
+String PhilipsTV_App_Name "Philips TV - Current App" {channel="philipstv:tv:5AFEF00D_BABE_DADA_FA5A_1c5a6bef9271:appName"}
+Image  PhilipsTV_App_Icon "Philips TV - Current App Icon" {channel="philipstv:tv:5AFEF00D_BABE_DADA_FA5A_1c5a6bef9271:appIcon"}
+String PhilipsTV_Channel_Name "Philips TV - Current Channel" {channel="philipstv:tv:5AFEF00D_BABE_DADA_FA5A_1c5a6bef9271:tvChannel"}
+Player PhilipsTV_Player "Philips TV - Player" {channel="philipstv:tv:5AFEF00D_BABE_DADA_FA5A_1c5a6bef9271:player"}
+String PhilipsTV_Search_Content "Philips TV - Search Content" {channel="philipstv:tv:5AFEF00D_BABE_DADA_FA5A_1c5a6bef9271:searchContent"}
+Switch PhilipsTV_Ambilight_Power "Philips TV - Ambilight Power" {channel="philipstv:tv:5AFEF00D_BABE_DADA_FA5A_1c5a6bef9271:ambilightPower"}
+Switch PhilipsTV_Ambilight_Hue_Power "Philips TV - Ambilight Hue Power" {channel="philipstv:tv:5AFEF00D_BABE_DADA_FA5A_1c5a6bef9271:ambilightHuePower"}
+```
