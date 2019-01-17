@@ -7,8 +7,19 @@
  */
 package org.openhab.binding.philipstv.internal.service;
 
+import org.apache.http.*;
+import org.apache.http.client.*;
+import org.apache.http.client.methods.*;
+import org.apache.http.entity.*;
+import org.apache.http.impl.client.*;
+import org.apache.http.util.*;
 import org.openhab.binding.philipstv.*;
 import org.openhab.binding.philipstv.internal.service.model.*;
+import org.slf4j.*;
+
+import java.io.*;
+import java.net.*;
+import java.security.*;
 
 /**
  * The {@link ConnectionService} is responsible for handling https GETs and POSTs to the Philips

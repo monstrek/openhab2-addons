@@ -7,6 +7,8 @@
  */
 package org.openhab.binding.philipstv.internal.service;
 
+import java.util.*;
+
 /**
  * The {@link KeyCode} presents all available key codes of Philips TV.
  *

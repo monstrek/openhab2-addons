@@ -8,7 +8,11 @@
  */
 package org.openhab.binding.philipstv.internal.service;
 
+import org.apache.http.conn.*;
+import org.eclipse.smarthome.core.types.*;
 import org.openhab.binding.philipstv.handler.*;
+
+import java.net.*;
 
 /**
  * Interface for Philips TV services.

@@ -7,11 +7,23 @@
  */
 package org.openhab.binding.philipstv.handler;
 
+import org.apache.http.*;
+import org.eclipse.smarthome.config.discovery.*;
+import org.eclipse.smarthome.core.library.types.*;
+import org.eclipse.smarthome.core.thing.*;
+import org.eclipse.smarthome.core.thing.binding.*;
+import org.eclipse.smarthome.core.types.*;
 import org.openhab.binding.philipstv.*;
 import org.openhab.binding.philipstv.internal.config.*;
 import org.openhab.binding.philipstv.internal.pairing.*;
 import org.openhab.binding.philipstv.internal.service.*;
 import org.openhab.binding.philipstv.internal.service.model.*;
+import org.slf4j.*;
+
+import java.io.*;
+import java.security.*;
+import java.util.*;
+import java.util.concurrent.*;
 
 import static org.openhab.binding.philipstv.PhilipsTvBindingConstants.*;
 

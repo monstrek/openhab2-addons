@@ -7,6 +7,14 @@
  */
 package org.openhab.binding.philipstv.internal.discovery;
 
+import org.eclipse.smarthome.config.discovery.*;
+import org.eclipse.smarthome.config.discovery.upnp.UpnpDiscoveryParticipant;
+import org.eclipse.smarthome.core.thing.*;
+import org.jupnp.model.meta.*;
+import org.slf4j.*;
+
+import java.util.*;
+
 import static org.openhab.binding.philipstv.PhilipsTvBindingConstants.*;
 
 /**

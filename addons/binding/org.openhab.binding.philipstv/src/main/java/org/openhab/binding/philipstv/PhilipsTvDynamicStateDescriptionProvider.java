@@ -1,5 +1,14 @@
 package org.openhab.binding.philipstv;
 
+import org.eclipse.jdt.annotation.*;
+import org.eclipse.smarthome.core.thing.*;
+import org.eclipse.smarthome.core.thing.type.*;
+import org.eclipse.smarthome.core.types.*;
+import org.osgi.service.component.annotations.*;
+
+import java.util.*;
+import java.util.concurrent.*;
+
 /**
  * Dynamic provider of state options while leaving other state description fields as original.
  *

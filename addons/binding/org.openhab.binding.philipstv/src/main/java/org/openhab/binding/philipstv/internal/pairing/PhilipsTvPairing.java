@@ -7,10 +7,28 @@
  */
 package org.openhab.binding.philipstv.internal.pairing;
 
+import com.google.gson.*;
+import org.apache.http.*;
+import org.apache.http.auth.*;
+import org.apache.http.client.*;
+import org.apache.http.client.methods.*;
+import org.apache.http.client.protocol.*;
+import org.apache.http.entity.*;
+import org.apache.http.impl.auth.*;
+import org.apache.http.impl.client.*;
+import org.apache.http.util.*;
 import org.openhab.binding.philipstv.*;
 import org.openhab.binding.philipstv.handler.*;
 import org.openhab.binding.philipstv.internal.service.*;
 import org.openhab.binding.philipstv.internal.service.model.*;
+import org.slf4j.*;
+
+import javax.crypto.*;
+import javax.crypto.spec.*;
+import java.io.*;
+import java.nio.charset.*;
+import java.security.*;
+import java.util.*;
 
 import static org.openhab.binding.philipstv.PhilipsTvBindingConstants.*;
 

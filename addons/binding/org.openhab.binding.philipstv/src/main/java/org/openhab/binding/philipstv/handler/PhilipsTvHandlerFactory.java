@@ -8,7 +8,14 @@
  */
 package org.openhab.binding.philipstv.handler;
 
+import org.eclipse.smarthome.config.discovery.*;
+import org.eclipse.smarthome.core.thing.*;
+import org.eclipse.smarthome.core.thing.binding.*;
 import org.openhab.binding.philipstv.*;
+import org.osgi.service.component.annotations.*;
+import org.slf4j.*;
+
+import java.util.*;
 
 import static org.openhab.binding.philipstv.PhilipsTvBindingConstants.*;
 

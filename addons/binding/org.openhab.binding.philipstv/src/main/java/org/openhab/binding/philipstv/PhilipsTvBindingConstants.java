@@ -7,6 +7,8 @@
  */
 package org.openhab.binding.philipstv;
 
+import org.eclipse.smarthome.core.thing.*;
+
 /**
  * The {@link PhilipsTvBindingConstants} class defines common constants, which are used across the
  * whole binding.

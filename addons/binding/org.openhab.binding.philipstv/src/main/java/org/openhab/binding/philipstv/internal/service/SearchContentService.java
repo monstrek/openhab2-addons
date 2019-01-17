@@ -1,7 +1,16 @@
 package org.openhab.binding.philipstv.internal.service;
 
+import com.google.gson.*;
+import org.apache.http.*;
+import org.eclipse.smarthome.core.library.types.*;
+import org.eclipse.smarthome.core.thing.*;
+import org.eclipse.smarthome.core.types.*;
 import org.openhab.binding.philipstv.handler.*;
 import org.openhab.binding.philipstv.internal.service.model.*;
+import org.slf4j.*;
+
+import java.io.*;
+import java.security.*;
 
 import static org.openhab.binding.philipstv.PhilipsTvBindingConstants.*;
 

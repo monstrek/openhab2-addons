@@ -7,8 +7,17 @@
  */
 package org.openhab.binding.philipstv;
 
-import org.apache.http.ssl.*;
+import org.apache.http.*;
+import org.apache.http.auth.*;
+import org.apache.http.client.*;
+import org.apache.http.client.config.*;
+import org.apache.http.conn.ssl.*;
+import org.apache.http.impl.client.*;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.openhab.binding.philipstv.internal.service.model.*;
+
+import javax.net.ssl.*;
+import java.security.*;
 
 import static org.openhab.binding.philipstv.PhilipsTvBindingConstants.*;
 
