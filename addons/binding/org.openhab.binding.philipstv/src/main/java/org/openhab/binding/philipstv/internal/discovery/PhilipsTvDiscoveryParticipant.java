@@ -67,7 +67,7 @@ public class PhilipsTvDiscoveryParticipant implements UpnpDiscoveryParticipant {
             // One Philips TV contains several UPnP devices.
             // Create unique Philips TV thing for every Media Renderer
             // device and ignore rest of the UPnP devices.
-            if (modelDescription.contains("Philips TV")) {
+            if (modelDescription.contains("Media")) {
               // UDN shouldn't contain '-' characters.
               String udn = device.getIdentity().getUdn().getIdentifierString().replace("-", "_");
               logger.debug("Discovered a Philips TV '{}' model '{}' thing with UDN '{}'",
