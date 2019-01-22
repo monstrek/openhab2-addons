@@ -61,13 +61,13 @@ public class PhilipsTvDiscoveryParticipant implements UpnpDiscoveryParticipant {
         String modelName = modelDetails.getModelName();
         String modelDescription = modelDetails.getModelDescription();
         if (modelName != null && modelDescription != null) {
-          logger.trace("Device found: {} with desc {}", modelName, modelDescription);
-          if (modelName.startsWith("Philips TV")) {
+          logger.debug("Device found: {} with desc {}", modelName, modelDescription);
+          if (modelName.contains("Philips TV")) {
             logger.debug("Device found: {} with desc {}", modelName, modelDescription);
             // One Philips TV contains several UPnP devices.
             // Create unique Philips TV thing for every Media Renderer
             // device and ignore rest of the UPnP devices.
-            if (modelDescription.contains("Philips TV Server")) {
+            if (modelDescription.contains("Philips TV")) {
               // UDN shouldn't contain '-' characters.
               String udn = device.getIdentity().getUdn().getIdentifierString().replace("-", "_");
               logger.debug("Discovered a Philips TV '{}' model '{}' thing with UDN '{}'",
