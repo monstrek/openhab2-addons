@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.2.0" configuration-pid="binding.philipstv" immediate="true" name="org.openhab.binding.philipstv.internal.PhilipsTvHandlerFactory">
+   <service>
+      <provide interface="org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory"/>
+   </service>
+   <implementation class="org.openhab.binding.philipstv.handler.PhilipsTvHandlerFactory"/>
+   <reference bind="setDiscoveryServiceRegistry" cardinality="1..1" interface="org.eclipse.smarthome.config.discovery.DiscoveryServiceRegistry" name="DiscoveryServiceRegistry" policy="static" unbind="unsetDiscoveryServiceRegistry"/>
+   <reference bind="setDynamicStateDescriptionProvider" interface="org.openhab.binding.philipstv.PhilipsTvDynamicStateDescriptionProvider" name="DynamicStateDescriptionProvider" unbind="unsetDynamicStateDescriptionProvider"/>
+</scr:component>
